@@ -12,13 +12,13 @@ description: >-
 
 ## 还没安装时
 
-执行这一行，然后重新打开终端：
+按安装指南逐步执行。安装前阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 。装好后阅读 `~/.haokan-creator/repo/docs/安装指南.md`。
 
 ```bash
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 ```
 
-装好后先读本目录旁边的技能说明。没有创作者账号、密码或密钥时，请用户联系谢峰申请，不要自己查找或编造。拿到之后再添加到本机。没登录成功之前，不要发布。用户没明确说发布之前，不要上传。
+没有创作者账号、密码或密钥时，请用户联系谢峰申请，不要自己查找或编造。拿到之后再添加到本机。没登录成功之前，不要发布。用户没明确说发布之前，不要上传。
 
 ## 账号
 

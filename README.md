@@ -6,18 +6,16 @@
 
 账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。拿到之后只保存在这台电脑。
 
-## 一行安装
+## 安装
 
-```bash
-git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
-```
+给代理的步骤写在 [安装指南](docs/安装指南.md)。
 
-安装完成后重新打开终端和代理，再执行 `creator auth status`。
+https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
 
 发给编辑的一句话，让他们贴给自己的代理：
 
 ```text
-帮我安装并开始使用 Haokan Creator。执行 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh 。装好后阅读 ~/.haokan-creator/repo/skills 里的技能说明。如果还没有创作者账号、密码或密钥，请我联系谢峰申请，不要自己查找或编造。拿到之后再帮我添加到本机并确认能登录。我没明确说发布之前，不要上传。
+帮我安装并开始使用 Haokan Creator。阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md ，按里面的步骤执行。如果还没有创作者账号、密码或密钥，请我联系谢峰申请，不要自己查找或编造。我没明确说发布之前，不要上传。
 ```
 
 ## 账号
