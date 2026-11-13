@@ -9,7 +9,8 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #ffffff;
+      --bg: #fafbfc;
+      --card: #ffffff;
       --surface: #f5f6f7;
       --text: #1f2329;
       --muted: #646a73;
@@ -28,35 +29,45 @@
     .page {
       max-width: 720px;
       margin: 0 auto;
-      padding: 72px 24px 96px;
+      padding: 64px 24px 80px;
       text-align: center;
     }
-    .logo {
+    .brand {
       width: 56px;
       height: 56px;
       margin: 0 auto 20px;
       border-radius: 14px;
-      background: linear-gradient(145deg, #3b82f6 0%, #1456f0 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 22px;
-      font-weight: 700;
+      box-shadow: 0 1px 2px rgba(31, 35, 41, 0.04);
     }
+    .brand svg { display: block; }
     h1 {
-      font-size: clamp(22px, 4.5vw, 28px);
+      font-size: clamp(22px, 4.5vw, 30px);
       font-weight: 600;
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       line-height: 1.35;
+      letter-spacing: -0.02em;
     }
     .lead {
-      margin: 0 auto 40px;
-      max-width: 28em;
+      margin: 0 auto 36px;
+      max-width: 26em;
       font-size: 15px;
       color: var(--muted);
     }
-    .install-box { text-align: left; max-width: 640px; margin: 0 auto; }
+    .install-box {
+      text-align: left;
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 4px 20px 24px;
+      box-shadow: 0 1px 2px rgba(31, 35, 41, 0.04);
+    }
     .tabs {
       display: flex;
       justify-content: center;
@@ -66,22 +77,23 @@
     .tab {
       background: none;
       border: 0;
-      padding: 0 4px 14px;
+      padding: 16px 4px 12px;
       margin-bottom: -1px;
       font-size: 15px;
       color: var(--muted);
       cursor: pointer;
       border-bottom: 2px solid transparent;
     }
+    .tab:hover { color: var(--text); }
     .tab.active {
       color: var(--primary);
       border-bottom-color: var(--primary);
       font-weight: 600;
     }
-    .panel { display: none; padding-top: 28px; }
+    .panel { display: none; padding-top: 24px; }
     .panel.active { display: block; }
     .hint {
-      margin: 0 0 16px;
+      margin: 0 0 14px;
       font-size: 14px;
       color: var(--muted);
       text-align: center;
@@ -96,8 +108,9 @@
     }
     .code-row code {
       flex: 1;
+      display: block;
       padding: 14px 16px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 13px;
       line-height: 1.55;
       white-space: pre-wrap;
@@ -109,77 +122,165 @@
       align-self: center;
       margin-right: 8px;
       border: 1px solid var(--line);
-      background: var(--bg);
+      background: var(--card);
       border-radius: 6px;
       padding: 7px 14px;
       font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
       cursor: pointer;
     }
+    .copy:hover { background: #fafbfc; border-color: #bbbfc4; }
+    .sub-code { margin-top: 12px; }
     .note {
-      margin-top: 20px;
-      padding: 12px 14px;
+      margin-top: 16px;
+      padding: 10px 12px;
       font-size: 13px;
       color: var(--muted);
       background: #f0f4ff;
       border: 1px solid #d6e4ff;
       border-radius: 8px;
-      text-align: left;
+      line-height: 1.55;
     }
     .success {
-      margin-top: 36px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
       font-size: 14px;
       color: var(--muted);
+      line-height: 1.7;
       text-align: center;
     }
     .success strong { color: var(--text); font-weight: 500; }
-    .links a { color: var(--primary); text-decoration: none; }
+    .links a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .links a:hover { text-decoration: underline; }
     .agents {
-      margin-top: 56px;
+      margin-top: 48px;
       padding-top: 40px;
       border-top: 1px solid var(--line);
-      text-align: center;
     }
-    .agents h2 { font-size: 16px; margin: 0 0 20px; }
-    .agent-chips {
+    .agents h2,
+    .caps h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 20px;
+    }
+    .agent-grid {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px 16px;
+      gap: 12px 20px;
     }
-    .agent-chips span {
-      font-size: 14px;
-      color: var(--muted);
-      padding: 6px 12px;
-      background: var(--surface);
-      border-radius: 6px;
+    .agent-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 0 12px 0 6px;
+      background: var(--card);
       border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .agent-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: -0.03em;
+    }
+    .caps {
+      margin-top: 48px;
+      text-align: left;
+    }
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+  @media (min-width: 560px) {
+      .cap-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .cap-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: left;
+    }
+    .cap-card h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cap-card p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    @media (max-width: 560px) {
+      .page { padding-top: 40px; }
+      .code-row { flex-direction: column; }
+      .copy {
+        margin: 0;
+        border-radius: 0;
+        border: 0;
+        border-top: 1px solid var(--line);
+        width: 100%;
+        padding: 10px;
+      }
+      .cap-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <main class="page">
-    <div class="logo" aria-hidden="true">Hc</div>
+    <div class="brand" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="6" width="20" height="16" rx="3" stroke="#1456F0" stroke-width="1.75"/>
+        <path d="M9 14h10M14 9v10" stroke="#1456F0" stroke-width="1.75" stroke-linecap="round"/>
+      </svg>
+    </div>
     <h1>仅需一行指令，在任意 Agent 发布创作者作品</h1>
-    <p class="lead">安装 Haokan Creator 命令行，在本机预览图片并上传到合辑。</p>
+    <p class="lead">安装 Haokan Creator，在本机预览裁切并上传到订阅合辑。</p>
 
     <div class="install-box">
       <div class="tabs" role="tablist">
-        <button class="tab" type="button" data-tab="manual">手动安装</button>
-        <button class="tab active" type="button" data-tab="agent">通过 AI Agent 安装</button>
+        <button class="tab" type="button" data-tab="manual" role="tab">手动安装</button>
+        <button class="tab active" type="button" data-tab="agent" role="tab">通过 AI Agent 安装</button>
       </div>
 
-      <section class="panel" id="manual">
-        <p class="hint">复制以下命令到终端运行即可完成安装：</p>
+      <section class="panel" id="manual" role="tabpanel">
+        <p class="hint">复制以下命令到终端运行（macOS / Linux，需 Git 与 Python 3.9+）</p>
         <div class="code-row">
           <code id="manual-install">git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh</code>
           <button class="copy" data-target="manual-install" type="button">复制</button>
         </div>
+        <div class="sub-code">
+          <p class="hint" style="margin-top:14px;text-align:left;font-size:13px">若提示找不到 creator：</p>
+          <div class="code-row">
+            <code id="manual-path">export PATH="$HOME/.local/bin:$PATH"</code>
+            <button class="copy" data-target="manual-path" type="button">复制</button>
+          </div>
+        </div>
+        <p class="note">安装包从 GitHub 拉取。clone 失败请联系谢峰获取离线包；登录与上传走国内线路。</p>
       </section>
 
-      <section class="panel active" id="agent">
-        <p class="hint">复制一行给 AI 助手；装好后在对话里问怎么配置和发布。</p>
+      <section class="panel active" id="agent" role="tabpanel">
+        <p class="hint">将下方提示词复制给 Cursor、Codex、Claude Code、Trae 等助手</p>
         <div class="code-row">
-          <code id="agent-text">帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md</code>
+          <code id="agent-text">帮我安装 Haokan Creator。打开 https://hk-h5-cdn.levect.com/html/xiefeng/creator/install.html 按步骤执行，并阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 完成配置。若还没有创作者账号、密码或签名密钥，提醒我联系谢峰申请（说明见 https://hao-kan.feishu.cn/wiki/ISdLwj2Wyibpk9ksGYZc3kyVngb ），不要自己编造。我没明确说发布之前不要上传。</code>
           <button class="copy" data-target="agent-text" type="button">复制提示词</button>
         </div>
       </section>
@@ -190,35 +291,74 @@
           <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md">使用指南</a>
           ·
           <a href="https://github.com/xiefengbest/haokan-creator">开源地址</a>
+          ·
+          <a href="https://hao-kan.feishu.cn/wiki/ISdLwj2Wyibpk9ksGYZc3kyVngb">签名密钥申请</a>
         </span>
       </p>
     </div>
 
-    <section class="agents">
+    <section class="agents" aria-label="支持的 Agent">
       <h2>支持所有主流 AI Agent 工具</h2>
-      <div class="agent-chips">
-        <span>Claude Code</span>
-        <span>Codex</span>
-        <span>Cursor</span>
-        <span>Trae</span>
+      <div class="agent-grid">
+        <div class="agent-item"><span class="agent-mark">CC</span>Claude Code</div>
+        <div class="agent-item"><span class="agent-mark">CX</span>Codex</div>
+        <div class="agent-item"><span class="agent-mark">Cu</span>Cursor</div>
+        <div class="agent-item"><span class="agent-mark">Tr</span>Trae</div>
+        <div class="agent-item"><span class="agent-mark">GH</span>GitHub Copilot</div>
+        <div class="agent-item"><span class="agent-mark">Ws</span>Windsurf</div>
+      </div>
+    </section>
+
+    <section class="caps" aria-label="能做什么">
+      <h2 style="text-align:center">装好后你能做什么</h2>
+      <div class="cap-grid">
+        <article class="cap-card">
+          <h3>预览裁切</h3>
+          <p>发布前查看各比例与安全区，确认后再上传。</p>
+        </article>
+        <article class="cap-card">
+          <h3>上传到合辑</h3>
+          <p>按文件夹批量发布到已有订阅合辑，支持排期。</p>
+        </article>
+        <article class="cap-card">
+          <h3>合辑与作品</h3>
+          <p>创建或管理合辑，更新描述，删除误发作品。</p>
+        </article>
+        <article class="cap-card">
+          <h3>账号与配置</h3>
+          <p>本机保存多个创作者号，导入签名密钥后登录校验。</p>
+        </article>
+        <article class="cap-card">
+          <h3>确认后执行</h3>
+          <p>增删改需你同意后加确认，避免 Agent 误操作。</p>
+        </article>
+        <article class="cap-card">
+          <h3>国内上传</h3>
+          <p>图片直传阿里云 OSS，走国内 API 与 STS。</p>
+        </article>
       </div>
     </section>
   </main>
   <script>
     document.querySelectorAll(".tab").forEach((tab) => {
       tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        document.querySelectorAll(".tab").forEach((t) => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
         document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
         tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
         document.getElementById(tab.dataset.tab).classList.add("active");
       });
     });
+    document.querySelectorAll(".tab.active").forEach((t) => t.setAttribute("aria-selected", "true"));
     document.querySelectorAll(".copy").forEach((button) => {
       button.addEventListener("click", async () => {
-        const text = document.getElementById(button.dataset.target).textContent;
+        const el = document.getElementById(button.dataset.target);
         const old = button.textContent;
         try {
-          await navigator.clipboard.writeText(text);
+          await navigator.clipboard.writeText(el.textContent);
           button.textContent = "已复制";
         } catch {
           button.textContent = "请手动复制";
