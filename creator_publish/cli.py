@@ -476,7 +476,12 @@ def _update_work(argv: list[str], profile_name: str | None) -> int:
         if len(next_content) > 100:
             return _fail("作品描述不能超过 100 个字。")
         next_albums = args.album_id or current_albums
-        start_ms = schedule_ms(args.start_date) if args.start_date else None
+        end_ms = None
+        start_ms = None
+        if args.start_date:
+            from creator_publish.manage import schedule_day_bounds
+
+            start_ms, end_ms = schedule_day_bounds(args.start_date)
         change_bits = []
         if args.content is not None:
             change_bits.append(f"描述改成：{next_content or '（空）'}")
@@ -506,7 +511,7 @@ def _update_work(argv: list[str], profile_name: str | None) -> int:
             next_albums,
             args.immediate,
             start_ms,
-            None,
+            end_ms,
         )
         group_id = client.update_work(body)
     except (ApiError, SystemExit) as exc:

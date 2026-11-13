@@ -135,11 +135,20 @@ def album_ids_from_info(info: dict) -> str:
 
 
 def schedule_ms(date_text: str) -> int:
-    from datetime import datetime
+    start, _end = schedule_day_bounds(date_text)
+    return start
+
+
+def schedule_day_bounds(date_text: str) -> tuple[int, int]:
+    """上海时区：排期当天 00:00:00 至 23:59:59（毫秒时间戳）。"""
+    from datetime import datetime, time
     from zoneinfo import ZoneInfo
 
-    moment = datetime.strptime(date_text.strip(), "%Y-%m-%d").replace(tzinfo=ZoneInfo("Asia/Shanghai"))
-    return int(moment.timestamp() * 1000)
+    shanghai = ZoneInfo("Asia/Shanghai")
+    day = datetime.strptime(date_text.strip(), "%Y-%m-%d").date()
+    start = datetime.combine(day, time(0, 0, 0), tzinfo=shanghai)
+    end = datetime.combine(day, time(23, 59, 59), tzinfo=shanghai)
+    return int(start.timestamp() * 1000), int(end.timestamp() * 1000)
 
 
 def creator_row(body: dict) -> dict:

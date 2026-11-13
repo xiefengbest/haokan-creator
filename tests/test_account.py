@@ -23,6 +23,11 @@ class ScheduleTest(unittest.TestCase):
         second = datetime.fromtimestamp(scheduled[1].start_time / 1000, shanghai)
         self.assertEqual(first.strftime("%Y-%m-%d %H:%M"), "2026-07-13 00:00")
         self.assertEqual(second.strftime("%Y-%m-%d %H:%M"), "2026-07-14 00:00")
+        self.assertIsNotNone(scheduled[0].end_time)
+        end_first = datetime.fromtimestamp(scheduled[0].end_time / 1000, shanghai)
+        self.assertEqual(end_first.strftime("%Y-%m-%d %H:%M:%S"), "2026-07-13 23:59:59")
+        end_second = datetime.fromtimestamp(scheduled[1].end_time / 1000, shanghai)
+        self.assertEqual(end_second.strftime("%Y-%m-%d %H:%M:%S"), "2026-07-14 23:59:59")
 
 
 class ProfileTest(unittest.TestCase):

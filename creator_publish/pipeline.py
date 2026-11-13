@@ -108,7 +108,14 @@ def schedule_daily(works: list[Work], day: str) -> list[Work]:
     scheduled = []
     for offset, work in enumerate(works):
         moment = start + timedelta(days=offset)
-        scheduled.append(replace(work, start_time=int(moment.timestamp() * 1000), end_time=None))
+        end_moment = moment.replace(hour=23, minute=59, second=59, microsecond=0)
+        scheduled.append(
+            replace(
+                work,
+                start_time=int(moment.timestamp() * 1000),
+                end_time=int(end_moment.timestamp() * 1000),
+            )
+        )
     return scheduled
 
 

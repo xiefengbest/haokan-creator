@@ -319,6 +319,8 @@ def _format_schedule(millis: int | None) -> str:
     from zoneinfo import ZoneInfo
 
     moment = datetime.fromtimestamp(millis / 1000, ZoneInfo("Asia/Shanghai"))
+    if moment.hour == 23 and moment.minute == 59 and moment.second == 59:
+        return moment.strftime("%Y-%m-%d %H:%M:%S")
     return moment.strftime("%Y-%m-%d %H:%M")
 
 
