@@ -177,6 +177,142 @@ class CreatorClient:
             action="删除作品",
         )
 
+    def list_albums(self) -> list[dict]:
+        data = self.post("/creator/cp/v1/album/list", {"pageIndex": 1, "pageSize": 50}, action="查看合辑")
+        _, body = unwrap(data)
+        rows = body.get("result") or body.get("list") or []
+        return rows if isinstance(rows, list) else []
+
+    def create_album(self, name: str, desc: str, refresh_rate: int) -> str:
+        created = self.post(
+            "/rlm/v1/album/create",
+            {"albumName": name, "permissions": 1, "desc": desc},
+            action="新建合辑",
+        )
+        album_id = pick(created, {"albumId"})
+        if not album_id:
+            raise ApiError("新建合辑", {"header": {}, "body": {"msg": "响应里没有合辑 ID", "response": redact(created)}})
+        self._submit_album(album_id, name, desc)
+        self._set_album_type(album_id, refresh_rate)
+        return str(album_id)
+
+    def delete_album(self, album_id: str) -> None:
+        if not self.session:
+            raise ApiError("删除合辑", {"body": {"msg": "还没登录"}})
+        self.post(
+            "/rlm/v1/album/member_rm",
+            {
+                "albumId": int(album_id),
+                "type": 2,
+                "memberId": int(self.session.user_id),
+            },
+            action="删除合辑",
+        )
+
+    def update_album(self, album_id: str, name: str, desc: str, refresh_rate: int | None) -> None:
+        self.post(
+            "/rlm/v1/album/setting",
+            {"albumId": album_id, "type": -1, "albumName": name, "permissions": 1, "desc": desc},
+            action="修改合辑",
+        )
+        self._submit_album(album_id, name, desc)
+        if refresh_rate is not None:
+            self._set_album_type(album_id, refresh_rate, modified=True)
+
+    def _submit_album(self, album_id: str, name: str, desc: str) -> None:
+        operator = int(self.session.user_id) if self.session and str(self.session.user_id).isdigit() else None
+        body = {
+            "albumId": album_id,
+            "albumStatus": -1,
+            "albumName": name,
+            "albumDesc": desc,
+            "bgImg": "",
+            "publicityImageIds": "",
+            "albumType": 6,
+        }
+        if operator:
+            body["operatorId"] = operator
+        self.post("/rlm/submitAlbum", body, action="保存合辑")
+
+    def _set_album_type(self, album_id: str, refresh_rate: int, modified: bool = False) -> None:
+        body = {
+            "albumId": album_id,
+            "albumType": 6,
+            "albumCopyright": 0,
+            "albumRange": "0,1,2",
+            "onlineStatus": 1,
+            "regions": "1,7,8",
+            "refreshRate": refresh_rate,
+        }
+        if modified:
+            body["modifiedFields"] = ["refreshRate"]
+        self.post("/creator/album/setType", body, action="保存合辑更新频率")
+
+    def list_works(self, group_id: str) -> list[dict]:
+        data = self.post(
+            "/creator/cp/v1/works/list",
+            {"pageIndex": 1, "pageSize": 5, "imageId": group_id},
+            action="查看作品",
+        )
+        _, body = unwrap(data)
+        rows = body.get("result") or []
+        return rows if isinstance(rows, list) else []
+
+    def work_info(self, group_id: str) -> dict:
+        data = self.post(
+            "/creator/works/info/v1",
+            {"imageGroupId": group_id, "listType": 1},
+            action="查看作品",
+        )
+        _, body = unwrap(data)
+        result = body.get("result") or body
+        return result if isinstance(result, dict) else {}
+
+    def work_sizes(self, group_id: str) -> list[dict]:
+        data = self.post(
+            "/creator/social/imagesizelist",
+            {"imageGroupId": group_id},
+            action="查看作品",
+        )
+        _, body = unwrap(data)
+        rows = body.get("list") or body.get("result") or []
+        return rows if isinstance(rows, list) else []
+
+    def update_work(self, body: dict) -> str:
+        result = self.post("/creator/social/releaseimage", body, action="修改作品")
+        group_id = pick(result, {"imageGroupId", "groupId"}) or body.get("groupId")
+        if not group_id:
+            raise ApiError("修改作品", {"header": {}, "body": {"msg": "响应里没有作品 ID", "response": redact(result)}})
+        return str(group_id)
+
+    def creator_info(self) -> dict:
+        if not self.session:
+            raise ApiError("查看资料", {"body": {"msg": "还没登录"}})
+        data = self.post(
+            "/rlm/creatorInfo",
+            {"operate": 1, "creatorId": int(self.session.user_id)},
+            action="查看资料",
+        )
+        _, body = unwrap(data)
+        return body if isinstance(body, dict) else {}
+
+    def update_creator(self, name: str, avatar_url: str, description: str, page_type: str, homepage: str) -> None:
+        if not self.session:
+            raise ApiError("修改资料", {"body": {"msg": "还没登录"}})
+        self.post(
+            "/rlm/creatorInfo",
+            {
+                "operate": 2,
+                "creatorId": int(self.session.user_id),
+                "name": name,
+                "url": avatar_url,
+                "description": description,
+                "homepage": homepage or None,
+                "pageType": page_type or None,
+            },
+            action="修改资料",
+        )
+
     def post(self, url: str, body: dict, auth: bool = True, action: str = "请求", check: bool = True) -> dict:
         payload = dict(body)
         user_id = ""

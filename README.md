@@ -18,10 +18,12 @@
 | 事项 | 能力 |
 | --- | --- |
 | 账号 | 在本机添加、查看、切换、删除创作者号，并检查能否登录 |
-| 作品 | 预览一个文件夹，确认后发布到一个已经存在的合辑 |
+| 合辑 | 查看、新建、修改名称/简介/更新频率、删除 |
+| 作品 | 预览并发布；修改描述/合辑/上线时间；删除 |
+| 资料 | 查看和修改昵称、简介、头像链接、一条社交链接 |
 | 更新 | 平时自动更新命令和技能说明。正在发布时不会中途更换程序 |
 
-合辑的新建和修改、作品的修改和删除、创作者资料修改还没有开放。遇到这些要求时停下来，不要自己请求创作者接口。
+合辑封面和横滑封面、作品换图还不能用命令行上传，需要到创作者后台处理。
 
 ## 安装与快速开始
 
@@ -61,12 +63,13 @@ git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/re
 | 要做的事 | 命令 |
 | --- | --- |
 | 查看本机账号 | `creator profile list` |
-| 添加账号 | 先不加 `--yes`。用户同意后，密码从标准输入传入，再加 `--yes` |
-| 切换默认账号 | `creator profile use 创作者名` |
-| 从本机删除账号 | `creator profile remove 创作者名` |
-| 检查能否登录 | `creator auth status` |
+| 查看合辑 | `creator album list` |
+| 新建合辑 | `creator album +create --name 名 --desc 简介 --frequency daily` |
+| 修改或删除合辑 | `creator album +update` / `creator album +delete` |
 | 预览发布 | `creator work +publish --dir 文件夹 --album-id 合辑ID` |
-| 确认后发布 | 在预览命令末尾加上 `--yes` |
+| 修改或删除作品 | `creator work +update` / `creator work +delete` |
+| 查看或修改资料 | `creator me +show` / `creator me +update` |
+| 确认后执行 | 在命令末尾加上 `--yes` |
 | 更新 | `creator update` |
 
 这里只有这一层命令。没有通用接口调用。不要自己拼创作者后台的请求。

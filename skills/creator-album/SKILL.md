@@ -12,6 +12,38 @@ metadata:
 
 先读 [creator-shared](../creator-shared/SKILL.md)。
 
-合辑的查看、新建、修改和删除还没有开放。告诉用户现在只能把作品发布到一个已经存在的合辑，合辑 ID 需要用户提供。还没有创作者账号或密钥时，请用户联系谢峰申请，不要继续。
+## 查看
 
-不要自己请求创作者接口去建合辑、改合辑或删合辑。以后开放时，也要先给出基本信息和变动，用户确认后才执行。
+```bash
+creator album list
+```
+
+## 新建
+
+更新频率必填：`daily`、`weekly`、`monthly`、`yearly`、`rotate`。
+
+```bash
+creator album +create --name 合辑名 --desc 简介 --frequency daily
+```
+
+先不加 `--yes`。把标准错误里的基本信息和变动告诉用户。用户同意后加 `--yes`。
+
+## 修改
+
+至少要改名称、简介或更新频率中的一项。
+
+```bash
+creator album +update --album-id <ID> --name 新名称 --desc 新简介 --frequency weekly
+```
+
+## 删除
+
+```bash
+creator album +delete --album-id <ID>
+```
+
+删除不能恢复。合辑里的作品需要用户另行处理。先确认，再加 `--yes`。
+
+## 封面和横滑封面
+
+命令行还不能上传合辑封面或横滑封面。需要改图片时，请用户到创作者后台处理。

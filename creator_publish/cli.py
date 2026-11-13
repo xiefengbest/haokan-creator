@@ -28,14 +28,9 @@ def main(argv=None) -> int:
         return 0
     group = argv[0]
     rest = argv[1:]
-    publishing = (
-        group == "work"
-        and rest[:1] == ["+publish"]
-        and "--yes" in rest
-        and "--dry-run" not in rest
-    )
+    writing = _online_write(group, rest)
     pending = False
-    if group != "update" and not publishing:
+    if group != "update" and not writing:
         state = _sync(allow_apply=True)
         if state == "updated":
             _restart()
@@ -49,12 +44,14 @@ def main(argv=None) -> int:
             code = _update(rest)
         elif group == "work":
             code = _work(rest, profile_name)
-        elif group in {"album", "me"}:
-            code = _later(group)
+        elif group == "album":
+            code = _album(rest, profile_name)
+        elif group == "me":
+            code = _me(rest, profile_name)
         else:
             print(_overview())
             return 2
-        if publishing and _sync(allow_apply=False) == "pending":
+        if writing and _sync(allow_apply=False) == "pending":
             pending = True
         if pending:
             _notice()
@@ -66,6 +63,28 @@ def main(argv=None) -> int:
         if isinstance(code, int):
             return code
         return _fail(str(code))
+
+
+def _online_write(group: str, rest: list[str]) -> bool:
+    if "--yes" not in rest or "--dry-run" in rest:
+        return False
+    action = rest[:1]
+    if group == "work" and action in (["+publish"], ["+update"], ["+delete"]):
+        return True
+    if group == "album" and action in (["+create"], ["+update"], ["+delete"]):
+        return True
+    return group == "me" and action == ["+update"]
+
+
+def _login(profile_name: str | None):
+    from creator_publish.api import CreatorClient
+    from creator_publish.config import load_settings
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    client = CreatorClient(load_settings(require_account=True))
+    client.login()
+    return item, client
 
 
 def _sync(allow_apply: bool) -> str:
@@ -193,11 +212,21 @@ def _update(argv: list[str]) -> int:
 def _work(argv: list[str], profile_name: str | None) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
         print("creator work +publish --dir <文件夹> --album-id <合辑ID> [--start-date 2026-07-13]")
+        print("creator work +update --group-id <作品ID> [--content 描述] [--album-id <合辑ID>]")
+        print("creator work +delete --group-id <作品ID>")
         print("先看基本信息和变动。用户确认后，在原命令末尾加上 --yes 再执行。")
         return 0
     action = argv[0]
-    if action != "+publish":
-        return _later("work " + action)
+    if action == "+publish":
+        return _publish(argv[1:], profile_name)
+    if action == "+update":
+        return _update_work(argv[1:], profile_name)
+    if action == "+delete":
+        return _delete_work(argv[1:], profile_name)
+    return _later("work " + action)
+
+
+def _publish(argv: list[str], profile_name: str | None) -> int:
     parser = argparse.ArgumentParser(prog="creator work +publish")
     parser.add_argument("--dir", required=True, type=Path, help="图片文件夹")
     parser.add_argument("--album-id", required=True, help="合辑 ID")
@@ -206,7 +235,7 @@ def _work(argv: list[str], profile_name: str | None) -> int:
     parser.add_argument("--yes", action="store_true", help="用户确认变动后再发布")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--square-from", choices=("portrait", "landscape"))
-    args = parser.parse_args(argv[1:])
+    args = parser.parse_args(argv)
     if not args.dir.exists():
         return _fail(f"找不到文件夹：{args.dir}")
     from creator_publish.profiles import apply_profile
@@ -246,6 +275,363 @@ def _work(argv: list[str], profile_name: str | None) -> int:
         },
         change,
     )
+
+
+def _album(argv: list[str], profile_name: str | None) -> int:
+    if not argv or argv[0] in {"-h", "--help"}:
+        print("creator album list")
+        print("creator album +create --name 合辑名 --desc 简介 --frequency daily")
+        print("creator album +update --album-id <ID> [--name 合辑名] [--desc 简介] [--frequency daily]")
+        print("creator album +delete --album-id <ID>")
+        print("先看基本信息和变动。用户确认后，在原命令末尾加上 --yes 再执行。")
+        return 0
+    action = argv[0]
+    if action == "list":
+        return _album_list(profile_name)
+    if action == "+create":
+        return _album_create(argv[1:], profile_name)
+    if action == "+update":
+        return _album_update(argv[1:], profile_name)
+    if action == "+delete":
+        return _album_delete(argv[1:], profile_name)
+    return _later("album " + action)
+
+
+def _album_list(profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import album_row
+
+    try:
+        _, client = _login(profile_name)
+        rows = [album_row(item) for item in client.list_albums()]
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"albums": rows})
+
+
+def _album_create(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import FREQUENCIES, limit_text, parse_frequency
+
+    parser = argparse.ArgumentParser(prog="creator album +create")
+    parser.add_argument("--name", required=True)
+    parser.add_argument("--desc", required=True)
+    parser.add_argument("--frequency", required=True, choices=tuple(FREQUENCIES))
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    try:
+        rate = parse_frequency(args.frequency)
+        assert rate is not None
+        name = limit_text(args.name, "cn", "合辑名称")
+        desc = limit_text(args.desc, "cn", "合辑简介")
+    except SystemExit as exc:
+        return _fail(str(exc))
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    label = FREQUENCIES[args.frequency][1]
+    if not args.yes:
+        return _confirm(
+            "新建合辑",
+            {"creator": item["name"], "name": name, "frequency": label},
+            f"将新建一个订阅合辑，更新频率是{label}。",
+        )
+    try:
+        _, client = _login(profile_name)
+        album_id = client.create_album(name, desc, rate)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"albumId": album_id, "name": name, "frequency": label})
+
+
+def _album_update(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import FREQUENCIES, album_row, find_album, frequency_label, limit_text, parse_frequency
+
+    parser = argparse.ArgumentParser(prog="creator album +update")
+    parser.add_argument("--album-id", required=True)
+    parser.add_argument("--name")
+    parser.add_argument("--desc")
+    parser.add_argument("--frequency", choices=tuple(FREQUENCIES))
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    if not any([args.name, args.desc, args.frequency]):
+        return _fail("请至少提供 --name、--desc 或 --frequency 中的一项。")
+    try:
+        rate = parse_frequency(args.frequency) if args.frequency else None
+    except SystemExit as exc:
+        return _fail(str(exc))
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    try:
+        _, client = _login(profile_name)
+        current = find_album(client.list_albums(), args.album_id)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    current_view = album_row(current)
+    next_name = limit_text(args.name, "cn", "合辑名称") if args.name else current_view["name"]
+    next_desc = limit_text(args.desc, "cn", "合辑简介") if args.desc else current_view["desc"]
+    next_label = FREQUENCIES[args.frequency][1] if args.frequency else current_view["frequency"]
+    if not args.yes:
+        return _confirm(
+            "修改合辑",
+            {
+                "creator": item["name"],
+                "albumId": args.album_id,
+                "name": next_name,
+                "frequency": next_label,
+            },
+            f"将把合辑简介改成：{next_desc}",
+        )
+    try:
+        client.update_album(args.album_id, next_name, next_desc, rate)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"albumId": args.album_id, "name": next_name, "frequency": next_label})
+
+
+def _album_delete(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import album_row, find_album
+
+    parser = argparse.ArgumentParser(prog="creator album +delete")
+    parser.add_argument("--album-id", required=True)
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    try:
+        _, client = _login(profile_name)
+        current = find_album(client.list_albums(), args.album_id)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    view = album_row(current)
+    if not args.yes:
+        return _confirm(
+            "删除合辑",
+            {"creator": item["name"], "albumId": args.album_id, "name": view["name"]},
+            "将从线上删除这个合辑，无法恢复。合辑里的作品需要另行处理。",
+        )
+    try:
+        client.delete_album(args.album_id)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"albumId": args.album_id, "removed": True})
+
+
+def _update_work(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import (
+        album_ids_from_info,
+        pick_cover,
+        schedule_ms,
+        work_summary,
+        work_update_body,
+    )
+
+    parser = argparse.ArgumentParser(prog="creator work +update")
+    parser.add_argument("--group-id", required=True)
+    parser.add_argument("--content")
+    parser.add_argument("--album-id")
+    parser.add_argument("--immediate", action="store_true", help="改成立即上线")
+    parser.add_argument("--start-date", help="预约上线日期 YYYY-MM-DD")
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    if not any([args.content is not None, args.album_id, args.immediate, args.start_date]):
+        return _fail("请至少提供 --content、--album-id、--immediate 或 --start-date 中的一项。")
+    if args.immediate and args.start_date:
+        return _fail("--immediate 和 --start-date 不要同时写。")
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    try:
+        _, client = _login(profile_name)
+        rows = client.list_works(args.group_id)
+        info = client.work_info(args.group_id)
+        if not rows and not info:
+            return _fail(f"没有找到作品 {args.group_id}。")
+        summary = work_summary(rows[0] if rows else info, args.group_id)
+        current_albums = album_ids_from_info(info) or summary.get("album", "")
+        next_content = (args.content if args.content is not None else summary["content"]).strip()
+        if len(next_content) > 100:
+            return _fail("作品描述不能超过 100 个字。")
+        next_albums = args.album_id or current_albums
+        start_ms = schedule_ms(args.start_date) if args.start_date else None
+        change_bits = []
+        if args.content is not None:
+            change_bits.append(f"描述改成：{next_content or '（空）'}")
+        if args.album_id:
+            change_bits.append(f"合辑改成：{args.album_id}")
+        if args.immediate:
+            change_bits.append("改成立即上线")
+        elif args.start_date:
+            change_bits.append(f"上线日期改成：{args.start_date}")
+        if not args.yes:
+            return _confirm(
+                "修改作品",
+                {
+                    "creator": item["name"],
+                    "groupId": args.group_id,
+                    "albumId": next_albums,
+                    "content": next_content,
+                },
+                "；".join(change_bits) or "将保存作品修改。",
+            )
+        cover = pick_cover(client.work_sizes(args.group_id))
+        body = work_update_body(
+            info,
+            cover,
+            args.group_id,
+            next_content,
+            next_albums,
+            args.immediate,
+            start_ms,
+            None,
+        )
+        group_id = client.update_work(body)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"groupId": group_id})
+
+
+def _delete_work(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import work_summary
+
+    parser = argparse.ArgumentParser(prog="creator work +delete")
+    parser.add_argument("--group-id", required=True)
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    try:
+        _, client = _login(profile_name)
+        rows = client.list_works(args.group_id)
+        info = client.work_info(args.group_id)
+        summary = work_summary(rows[0] if rows else info, args.group_id)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    if not args.yes:
+        return _confirm(
+            "删除作品",
+            {
+                "creator": item["name"],
+                "groupId": summary["groupId"],
+                "content": summary["content"],
+                "album": summary["album"],
+            },
+            "将从线上删除这件作品，无法恢复。",
+        )
+    try:
+        client.delete_work(args.group_id)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"groupId": args.group_id, "removed": True})
+
+
+def _me(argv: list[str], profile_name: str | None) -> int:
+    if not argv or argv[0] in {"-h", "--help"}:
+        print("creator me +show")
+        print("creator me +update --name 昵称 [--description 简介] [--avatar-url 头像地址]")
+        print("creator me +update --social-platform xiaohongshu --social-url https://...")
+        print("creator me +update --clear-social")
+        print("先看基本信息和变动。用户确认后，在原命令末尾加上 --yes 再执行。")
+        return 0
+    action = argv[0]
+    if action == "+show":
+        return _me_show(profile_name)
+    if action == "+update":
+        return _me_update(argv[1:], profile_name)
+    return _later("me " + action)
+
+
+def _me_show(profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import SOCIALS, creator_row
+
+    try:
+        item, client = _login(profile_name)
+        row = creator_row(client.creator_info())
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    platform = row.get("socialPlatform") or ""
+    return _ok(
+        {
+            "creator": item["name"],
+            "name": row["name"],
+            "description": row["description"],
+            "avatarUrl": row["avatarUrl"],
+            "socialPlatform": platform,
+            "socialLabel": SOCIALS.get(platform, ""),
+            "socialUrl": row.get("socialUrl") or "",
+        }
+    )
+
+
+def _me_update(argv: list[str], profile_name: str | None) -> int:
+    from creator_publish.api import ApiError
+    from creator_publish.manage import SOCIALS, creator_row, limit_text, social_change
+
+    parser = argparse.ArgumentParser(prog="creator me +update")
+    parser.add_argument("--name")
+    parser.add_argument("--description")
+    parser.add_argument("--avatar-url")
+    parser.add_argument("--social-platform", choices=tuple(SOCIALS))
+    parser.add_argument("--social-url")
+    parser.add_argument("--clear-social", action="store_true")
+    parser.add_argument("--yes", action="store_true")
+    args = parser.parse_args(argv)
+    if not any([args.name, args.description is not None, args.avatar_url, args.social_platform, args.social_url, args.clear_social]):
+        return _fail("请至少提供一项要修改的资料。")
+    if args.clear_social and (args.social_platform or args.social_url):
+        return _fail("--clear-social 不要和社交链接参数一起写。")
+    from creator_publish.profiles import apply_profile
+
+    item = apply_profile(profile_name)
+    region = item.get("region") or "cn"
+    try:
+        _, client = _login(profile_name)
+        current = creator_row(client.creator_info())
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    next_name = limit_text(args.name, region, "昵称") if args.name else current["name"]
+    if args.description is not None:
+        next_description = limit_text(args.description, region, "简介")
+    else:
+        next_description = current["description"]
+    next_avatar = (args.avatar_url or current["avatarUrl"]).strip()
+    try:
+        page_type, homepage = social_change(args.social_platform, args.social_url, args.clear_social)
+    except SystemExit as exc:
+        return _fail(str(exc))
+    if not page_type and not homepage and not args.clear_social:
+        page_type = current.get("socialPlatform") or ""
+        homepage = current.get("socialUrl") or ""
+    changes = []
+    if args.name:
+        changes.append(f"昵称改成：{next_name}")
+    if args.description is not None:
+        changes.append("将更新简介")
+    if args.avatar_url:
+        changes.append("将更新头像")
+    if args.clear_social:
+        changes.append("将移除社交链接")
+    elif args.social_platform or args.social_url:
+        changes.append(f"社交链接改成：{SOCIALS.get(page_type, page_type)}")
+    if not args.yes:
+        return _confirm(
+            "修改创作者资料",
+            {"creator": item["name"], "name": next_name},
+            "；".join(changes) or "将保存资料修改。",
+        )
+    try:
+        client.update_creator(next_name, next_avatar, next_description, page_type, homepage)
+    except (ApiError, SystemExit) as exc:
+        return _fail(str(exc))
+    return _ok({"name": next_name, "updated": True})
 
 
 def _later(group: str) -> int:
@@ -296,9 +682,21 @@ def _overview() -> str:
   creator profile use 创作者名
   creator --profile 创作者名 auth status
 
-发布：
+合辑：
+  creator album list
+  creator album +create --name 合辑名 --desc 简介 --frequency daily --yes
+  creator album +update --album-id <ID> --name 新名称 --yes
+  creator album +delete --album-id <ID> --yes
+
+作品：
   creator work +publish --dir <文件夹> --album-id <合辑ID> --start-date 2026-07-13
-  creator work +publish --dir <文件夹> --album-id <合辑ID> --start-date 2026-07-13 --yes
+  creator work +publish --dir <文件夹> --album-id <合辑ID> --yes
+  creator work +update --group-id <作品ID> --content 描述 --yes
+  creator work +delete --group-id <作品ID> --yes
+
+资料：
+  creator me +show
+  creator me +update --description 新简介 --yes
 
 更新：
   creator update
