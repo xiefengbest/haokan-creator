@@ -35,9 +35,9 @@ class ProfileTest(unittest.TestCase):
         self.home.cleanup()
 
     def test_add_and_resolve_without_printing_password(self):
-        add_profile("南柯一客", "13800138000", "secret-value", "cn")
+        add_profile("测试账号", "13800138000", "secret-value", "cn")
         listed = list_profiles()
-        self.assertEqual(listed[0]["name"], "南柯一客")
+        self.assertEqual(listed[0]["name"], "测试账号")
         self.assertNotIn("secret-value", str(listed))
         resolved = resolve_profile(None)
         self.assertEqual(resolved["password"], "secret-value")
