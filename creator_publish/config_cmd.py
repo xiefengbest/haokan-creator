@@ -6,29 +6,10 @@ import os
 import shutil
 from pathlib import Path
 
-from creator_publish.config import ENV_PATH, data_home, load_env_file
+from creator_publish.config import ENV_PATH, apply_builtin_defaults, data_home, load_env_file
 
-COMMON_KEYS = (
-    "CREATOR_SIGN_KEY",
-    "CREATOR_COMPANY_ID",
-    "CREATOR_CLIENT_TYPE",
-    "CREATOR_API_VERSION",
-    "CREATOR_STS_URL",
-)
-REGION_KEYS = {
-    "cn": (
-        "CREATOR_CN_API",
-        "CREATOR_CN_OSS_RES",
-        "CREATOR_CN_BUCKET",
-        "CREATOR_CN_ENDPOINT",
-    ),
-    "xjp": (
-        "CREATOR_XJP_API",
-        "CREATOR_XJP_OSS_RES",
-        "CREATOR_XJP_BUCKET",
-        "CREATOR_XJP_ENDPOINT",
-    ),
-}
+REQUIRED_KEYS = ("CREATOR_SIGN_KEY",)
+OPTIONAL_KEYS = ("CREATOR_REGION",)
 
 
 def backend_env_path() -> Path:
@@ -57,15 +38,6 @@ def merged_backend_values() -> dict[str, str]:
     return merged
 
 
-def required_keys(region: str) -> tuple[str, ...]:
-    normalized = region.lower()
-    if normalized in {"sg", "singapore", "global"}:
-        normalized = "xjp"
-    if normalized not in REGION_KEYS:
-        normalized = "cn"
-    return COMMON_KEYS + REGION_KEYS[normalized]
-
-
 def inspect_backend() -> dict:
     backend = backend_env_path()
     optional = ENV_PATH
@@ -73,7 +45,7 @@ def inspect_backend() -> dict:
     region = values.get("CREATOR_REGION", "cn").lower()
     if not values and optional.is_file():
         region = _parse_env_map(optional).get("CREATOR_REGION", "cn").lower()
-    missing = [key for key in required_keys(region) if not values.get(key)]
+    missing = [key for key in REQUIRED_KEYS if not values.get(key)]
     return {
         "backendEnv": str(backend),
         "backendEnvExists": backend.is_file(),
@@ -81,6 +53,7 @@ def inspect_backend() -> dict:
         "region": region,
         "ready": backend.is_file() and not missing,
         "missingKeys": missing,
+        "usesBuiltinEndpoints": True,
     }
 
 
@@ -90,22 +63,33 @@ def import_backend(source: Path) -> Path:
     values = _parse_env_map(source)
     if not values:
         raise SystemExit("这个文件里没有可用的配置项。")
-    region = values.get("CREATOR_REGION", "cn")
-    missing = [key for key in required_keys(region) if not values.get(key)]
+    missing = [key for key in REQUIRED_KEYS if not values.get(key)]
     if missing:
-        raise SystemExit(f"这份配置还缺：{'、'.join(missing)}。请向谢峰索取完整 backend.env。")
+        raise SystemExit(f"这份配置还缺：{'、'.join(missing)}。向谢峰索取 CREATOR_SIGN_KEY 即可，其它地址 CLI 已内置。")
     target = backend_env_path()
     target.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     os.chmod(target.parent, 0o700)
-    shutil.copyfile(source, target)
+    lines = []
+    keep = set(REQUIRED_KEYS + OPTIONAL_KEYS)
+    for raw in source.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key = line.split("=", 1)[0].strip()
+        if key in keep:
+            lines.append(f"{key}={values[key]}")
+    if "CREATOR_REGION" not in values:
+        lines.append("CREATOR_REGION=cn")
+    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
     target.chmod(0o600)
     load_env_file(target)
+    apply_builtin_defaults(values.get("CREATOR_REGION", "cn"))
     return target
 
 
 def describe_status(payload: dict) -> str:
     if payload["ready"]:
-        return "后台配置已就绪，可以登录和发布。"
+        return "后台配置已就绪（签名密钥已配置，接口地址使用内置默认值），可以登录和发布。"
     if not payload["backendEnvExists"]:
-        return "还没有 backend.env。请执行 creator config import <谢峰提供的文件>。"
+        return "还没有 backend.env。请执行 creator config import <谢峰提供的文件>，文件里只需 CREATOR_SIGN_KEY。"
     return f"后台配置不完整，还缺：{'、'.join(payload['missingKeys'])}。"

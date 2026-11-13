@@ -3,141 +3,316 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="一行命令安装 Haokan Creator，支持手动安装与 AI Agent 引导。" />
   <title>安装 Haokan Creator</title>
+  <link rel="canonical" href="https://xiefengbest.github.io/haokan-creator/install.html" />
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f5f7fb;
+      color-scheme: light dark;
+      --bg: #f0f2f8;
+      --bg-accent: radial-gradient(1200px 600px at 10% -10%, #dbeafe 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #e0e7ff 0%, transparent 50%);
       --card: #ffffff;
-      --text: #1f2329;
-      --muted: #646a73;
-      --line: #e5e6eb;
-      --primary: #1456f0;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --ok: #047857;
+      --shadow: 0 1px 2px rgba(17, 24, 39, 0.06), 0 8px 24px rgba(17, 24, 39, 0.06);
+    }
+  @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1117;
+        --bg-accent: radial-gradient(1200px 600px at 10% -10%, #1e3a5f 0%, transparent 55%),
+          radial-gradient(900px 500px at 100% 0%, #1e1b4b 0%, transparent 50%);
+        --card: #181b22;
+        --text: #f3f4f6;
+        --muted: #9ca3af;
+        --line: #2d333d;
+        --primary: #60a5fa;
+        --primary-soft: #1e293b;
+        --ok: #34d399;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+      }
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+      font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
+      background-image: var(--bg-accent);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.65;
+      min-height: 100vh;
     }
-    .wrap { max-width: 820px; margin: 0 auto; padding: 48px 20px 64px; }
-    h1 { font-size: 28px; margin: 0 0 8px; }
-    .lead { color: var(--muted); margin: 0 0 28px; }
-    .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 72px; }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: clamp(26px, 5vw, 34px); margin: 0 0 10px; line-height: 1.25; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 16px; max-width: 42em; }
+    .url-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+    .url-label { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+    .url-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .url-row a, .url-row code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      word-break: break-all;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
     .tab {
-      background: none;
-      border: 0;
-      padding: 0 0 12px;
-      font-size: 15px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 14px;
       color: var(--muted);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
     }
-    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .tab.active {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      font-weight: 600;
+    }
     .panel { display: none; }
     .panel.active { display: block; }
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 14px;
+      padding: 20px 20px 18px;
+      box-shadow: var(--shadow);
     }
     .hint { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .code-block { margin-bottom: 14px; }
+    .code-block:last-child { margin-bottom: 0; }
+    .code-label { font-size: 12px; color: var(--muted); margin: 0 0 6px; }
     .code {
       display: flex;
       gap: 12px;
       align-items: flex-start;
       justify-content: space-between;
-      background: #f8f9fa;
+      background: color-mix(in srgb, var(--card) 88%, var(--muted));
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 12px 14px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 13px;
+      line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-all;
     }
     .copy {
       flex: 0 0 auto;
       border: 1px solid var(--line);
-      background: #fff;
+      background: var(--card);
       border-radius: 8px;
       padding: 6px 10px;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       color: var(--text);
     }
     .copy:active { transform: scale(0.98); }
-    .footer { margin-top: 24px; font-size: 14px; color: var(--muted); }
-    a { color: var(--primary); }
+    .steps {
+      margin-top: 28px;
+      display: grid;
+      gap: 12px;
+    }
+    .step {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .step h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-num {
+      display: inline-flex;
+      width: 22px;
+      height: 22px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid var(--line);
+    }
+    .step p { margin: 0; font-size: 14px; color: var(--muted); }
+    .step code {
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--card) 80%, var(--muted));
+      border: 1px solid var(--line);
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .footer ul { margin: 8px 0 0; padding-left: 1.2em; }
+    a { color: var(--primary); text-decoration-thickness: 1px; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Haokan Creator</h1>
-    <p class="lead">仅需一行指令，在任意 Agent 使用创作者命令行。</p>
+    <span class="badge">Haokan Creator</span>
+    <h1>好看云壁纸 · 创作者命令行</h1>
+    <p class="sub">一行装好 <code>creator</code>，在本机预览、上传作品。本页可复制安装命令与 Agent 提示词；详细步骤仍见 GitHub 文档。</p>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="manual" type="button">手动安装</button>
-      <button class="tab" data-tab="agent" type="button">通过 AI Agent 安装</button>
+    <section class="url-card" aria-label="本页公开地址">
+      <p class="url-label">公开访问地址（可转发给编辑或贴进飞书）</p>
+      <div class="url-row">
+        <a id="public-url" href="https://xiefengbest.github.io/haokan-creator/install.html">https://xiefengbest.github.io/haokan-creator/install.html</a>
+        <button class="copy" data-copy-text="https://xiefengbest.github.io/haokan-creator/install.html" type="button">复制链接</button>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="安装方式">
+      <button class="tab active" data-tab="manual" type="button" role="tab" aria-selected="true">手动安装</button>
+      <button class="tab" data-tab="agent" type="button" role="tab" aria-selected="false">Agent 安装</button>
     </div>
 
-    <section class="panel active" id="manual">
+    <section class="panel active" id="manual" role="tabpanel">
       <div class="card">
-        <p class="hint">复制以下命令到终端运行即可完成安装：</p>
-        <div class="code">
-          <code id="manual-text">git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh</code>
-          <button class="copy" data-target="manual-text" type="button">复制</button>
+        <p class="hint">在 macOS 或 Linux 终端粘贴并运行（需已安装 Git 与 Python 3.9+）：</p>
+        <div class="code-block">
+          <div class="code-label">安装</div>
+          <div class="code">
+            <code id="manual-install">git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh</code>
+            <button class="copy" data-target="manual-install" type="button">复制</button>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-label">若提示找不到 creator</div>
+          <div class="code">
+            <code id="manual-path">export PATH="$HOME/.local/bin:$PATH"</code>
+            <button class="copy" data-target="manual-path" type="button">复制</button>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="panel" id="agent">
+    <section class="panel" id="agent" role="tabpanel">
       <div class="card">
-        <p class="hint">将下方提示词复制给你的 AI 助手（Claude Code、Codex、Cursor、Trae 等），它会自动完成安装：</p>
-        <p class="hint" style="margin-bottom:8px">提示词</p>
-        <div class="code">
-          <code id="agent-text">帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md</code>
-          <button class="copy" data-target="agent-text" type="button">复制提示词</button>
+        <p class="hint">整段复制给 Cursor、Codex、Claude Code 等代理，由它按页面与安装指南执行：</p>
+        <div class="code-block">
+          <div class="code-label">提示词</div>
+          <div class="code">
+            <code id="agent-text">帮我安装 Haokan Creator。先打开 https://xiefengbest.github.io/haokan-creator/install.html 按步骤安装，并阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 完成配置。我还没有创作者账号、密码或签名密钥时，请提醒我联系谢峰申请，不要自己编造。我没明确说发布之前不要上传。</code>
+            <button class="copy" data-target="agent-text" type="button">复制提示词</button>
+          </div>
         </div>
       </div>
     </section>
 
-    <p class="footer">
-      安装后请重新打开终端，并阅读
-      <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md">安装指南</a>
-      与
-      <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md">使用指南</a>
-      。账号、密码和密钥需要联系谢峰申请。
-    </p>
+    <section class="steps" aria-label="装好后">
+      <div class="step">
+        <h3><span class="step-num">1</span>导入签名密钥</h3>
+        <p>向谢峰索取含 <code>CREATOR_SIGN_KEY</code> 的文件，执行 <code>creator config import &lt;文件路径&gt;</code>，再 <code>creator config status</code>（<code>ready: true</code>）。</p>
+      </div>
+      <div class="step">
+        <h3><span class="step-num">2</span>添加创作者账号</h3>
+        <p>用 <code>creator profile add</code> 保存手机号与密码（不要写进配置文件）。</p>
+      </div>
+      <div class="step">
+        <h3><span class="step-num">3</span>验证登录</h3>
+        <p>执行 <code>creator auth status</code>，返回 <code>"ok": true</code> 后再发布。日常用法见使用指南。</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>文档链接</p>
+      <ul>
+        <li><a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md">安装指南（给 Agent 读）</a></li>
+        <li><a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md">使用指南</a></li>
+        <li><a href="https://github.com/xiefengbest/haokan-creator">GitHub 仓库</a></li>
+      </ul>
+      <p style="margin-top:16px">账号、密码与签名密钥需联系谢峰申请，勿在群里明文传播。</p>
+    </footer>
   </div>
   <script>
+    const PUBLIC_URL = "https://xiefengbest.github.io/haokan-creator/install.html";
     const tabs = document.querySelectorAll(".tab");
     const panels = document.querySelectorAll(".panel");
     tabs.forEach((tab) => {
       tab.addEventListener("click", () => {
-        tabs.forEach((item) => item.classList.remove("active"));
+        tabs.forEach((item) => {
+          item.classList.remove("active");
+          item.setAttribute("aria-selected", "false");
+        });
         panels.forEach((item) => item.classList.remove("active"));
         tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
         document.getElementById(tab.dataset.tab).classList.add("active");
       });
     });
-    document.querySelectorAll(".copy").forEach((button) => {
-      button.addEventListener("click", async () => {
+
+    async function copyText(text, button) {
+      const old = button.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = "已复制";
+      } catch {
+        button.textContent = "请手动复制";
+      }
+      setTimeout(() => { button.textContent = old; }, 1600);
+    }
+
+    document.querySelectorAll(".copy[data-target]").forEach((button) => {
+      button.addEventListener("click", () => {
         const text = document.getElementById(button.dataset.target).textContent;
-        try {
-          await navigator.clipboard.writeText(text);
-          const old = button.textContent;
-          button.textContent = "已复制";
-          setTimeout(() => { button.textContent = old; }, 1500);
-        } catch {
-          button.textContent = "请手动复制";
-        }
+        copyText(text, button);
       });
     });
+    document.querySelectorAll(".copy[data-copy-text]").forEach((button) => {
+      button.addEventListener("click", () => copyText(button.dataset.copyText, button));
+    });
+
+    if (location.protocol === "file:" || location.hostname === "raw.githubusercontent.com") {
+      const link = document.getElementById("public-url");
+      if (link) {
+        link.textContent = PUBLIC_URL + "（需开启 GitHub Pages 后访问）";
+      }
+    }
   </script>
 </body>
 </html>

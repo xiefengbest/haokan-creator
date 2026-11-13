@@ -41,6 +41,12 @@ def load_env_files() -> None:
     load_env_file(ENV_PATH)
 
 
+def apply_builtin_defaults(region: str) -> None:
+    from creator_publish.backend_defaults import apply_region_defaults
+
+    apply_region_defaults(region, os.environ)
+
+
 @dataclass(frozen=True)
 class Settings:
     region: str
@@ -91,6 +97,7 @@ def load_settings(require_account: bool, require_album: bool = False) -> Setting
         region = "xjp"
     if region not in {"cn", "xjp"}:
         raise SystemExit("CREATOR_REGION 只能是 cn 或 xjp")
+    apply_builtin_defaults(region)
     square_from = os.environ.get("CREATOR_SQUARE_FROM", "portrait").strip().lower()
     if square_from not in {"portrait", "landscape"}:
         raise SystemExit("CREATOR_SQUARE_FROM 只能是 portrait 或 landscape")
@@ -105,12 +112,15 @@ def load_settings(require_account: bool, require_album: bool = False) -> Setting
     profile = {key: os.environ.get(name, "").strip() for key, name in endpoint_name.items()}
     sign_key = os.environ.get("CREATOR_SIGN_KEY", "").strip()
     sts_url = os.environ.get("CREATOR_STS_URL", "").strip()
-    if require_account and (any(not profile[key] for key in endpoint_name) or not sign_key or not sts_url):
+    if require_account and not sign_key:
         home = data_home()
         raise SystemExit(
-            f"本机还没有后台配置。请把谢峰提供的 backend.env 放到 {home}/backend.env。"
+            f"本机还没有签名密钥。请把谢峰提供的 CREATOR_SIGN_KEY 写到 {home}/backend.env，"
+            f"或执行 creator config import。"
             f"{APPLY_HINT}"
         )
+    if require_account and (any(not profile[key] for key in endpoint_name) or not sts_url):
+        raise SystemExit("内置后台地址不完整。请联系谢峰更新 CLI，或在本机用环境变量覆盖 CREATOR_CN_* / CREATOR_STS_URL。")
     phone = os.environ.get("CREATOR_PHONE", "").strip()
     password = os.environ.get("CREATOR_PASSWORD", "")
     if require_account:

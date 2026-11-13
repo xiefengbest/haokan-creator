@@ -11,7 +11,7 @@
 - 给代理用：四个技能说明告诉代理何时执行哪条命令，代理不需要再猜接口
 - 命令直接执行：登录、预览、上传都在编辑自己的电脑上完成
 - 先确认再改动：添加账号、切换账号、发布作品都会先停住，用户明确同意后才执行
-- 公开仓库不放密钥：后台配置由谢峰提供 `~/.haokan-creator/backend.env`，编辑不用自己填
+- 公开仓库不放密钥：编辑只需谢峰提供的 `CREATOR_SIGN_KEY`（`~/.haokan-creator/backend.env`）；接口与 OSS 地址内置在 CLI
 
 ## 现在能做的事
 
@@ -27,7 +27,7 @@
 
 ## 安装与快速开始
 
-需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。两种装法见 [安装入口](docs/安装入口.md)（也可打开 [docs/install.html](docs/install.html) 复制）。
+需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。安装页：**https://xiefengbest.github.io/haokan-creator/install.html**（详见 [安装入口](docs/安装入口.md)）。
 
 **手动安装** — 复制到终端：
 
