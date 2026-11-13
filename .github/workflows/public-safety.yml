@@ -1,0 +1,15 @@
+name: public-safety
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 检查公开仓库没有密钥和后台配置
+        run: python3 scripts/check_public_repo.py

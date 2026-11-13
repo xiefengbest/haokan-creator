@@ -53,6 +53,12 @@ class Settings:
     client_type: int = 0
     api_version: str = ""
 
+    def __repr__(self) -> str:
+        return (
+            f"Settings(region={self.region!r}, creator_name={self.creator_name!r}, "
+            f"album_id={self.album_id!r})"
+        )
+
 
 def parse_phone(raw: str, phone_code: str = "+86") -> tuple[str, str]:
     text = re.sub(r"[\s-]", "", raw.strip())

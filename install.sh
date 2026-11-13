@@ -47,5 +47,11 @@ for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
   fi
 done
 
+if [[ -f "$SRC/scripts/git-hooks/pre-commit" ]]; then
+  mkdir -p "$SRC/.git/hooks"
+  cp "$SRC/scripts/git-hooks/pre-commit" "$SRC/.git/hooks/pre-commit"
+  chmod +x "$SRC/.git/hooks/pre-commit"
+fi
+
 echo "Haokan Creator 已安装到 $SRC"
 echo "重新打开终端和代理后，执行：creator auth status"

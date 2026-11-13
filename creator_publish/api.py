@@ -14,22 +14,14 @@ from typing import Optional
 import requests
 
 from creator_publish.config import Settings
+from creator_publish.redact import redact
 from creator_publish.sign import build_header, canonical_body, dumps
-
-SECRET_FIELDS = {
-    "token",
-    "pass",
-    "password",
-    "accesskeysecret",
-    "securitytoken",
-    "accesskeyid",
-}
 
 
 class ApiError(Exception):
     def __init__(self, action: str, payload):
         self.action = action
-        self.payload = payload
+        self.payload = redact(payload)
         super().__init__(self.summary())
 
     def summary(self) -> str:
@@ -63,20 +55,6 @@ def unwrap(data: dict) -> tuple[dict, dict]:
     if not isinstance(body, dict):
         body = {"msg": str(body)}
     return header, body
-
-
-def redact(value):
-    if isinstance(value, dict):
-        cleaned = {}
-        for key, item in value.items():
-            if key.lower() in SECRET_FIELDS:
-                cleaned[key] = "***"
-            else:
-                cleaned[key] = redact(item)
-        return cleaned
-    if isinstance(value, list):
-        return [redact(item) for item in value]
-    return value
 
 
 def ensure_ok(data: dict, action: str) -> dict:
@@ -233,13 +211,13 @@ class CreatorClient:
                 timeout=(10, 60),
             )
         except requests.RequestException as exc:
-            raise ApiError(action, {"body": {"msg": str(exc)}}) from exc
+            raise ApiError(action, {"body": {"msg": "网络请求失败"}}) from exc
         try:
             data = response.json()
         except ValueError as exc:
-            raise ApiError(action, {"body": {"msg": response.text[:500], "status": response.status_code}}) from exc
+            raise ApiError(action, {"body": {"msg": "接口返回了无法识别的内容", "status": response.status_code}}) from exc
         if response.status_code >= 400:
-            raise ApiError(action, data if isinstance(data, dict) else {"body": {"msg": response.text[:500]}})
+            raise ApiError(action, data if isinstance(data, dict) else {"body": {"msg": "接口返回了无法识别的内容"}})
         if not isinstance(data, dict):
             raise ApiError(action, {"body": {"msg": "响应不是 JSON 对象"}})
         if check:

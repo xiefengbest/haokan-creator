@@ -1,6 +1,8 @@
 # Haokan Creator
 
-编辑在自己的电脑上使用的创作者后台命令行。图片从本机直接传到 OSS，不经过别人的服务器。账号保存在本机数据目录 `~/.haokan-creator`。后台地址、OSS 和签名写在安装目录的 `.env`，仓库里只有空的 `.env.example`。
+编辑在自己的电脑上使用的创作者后台命令行。图片从本机直接传到 OSS，不经过别人的服务器。账号保存在本机数据目录 `~/.haokan-creator`。
+
+这个 GitHub 仓库是公开的。后台地址、OSS 和签名只写在安装目录的 `.env`，不要提交。仓库里的 `.env.example` 必须保持空白。
 
 ## 一行安装
 
@@ -67,4 +69,5 @@ creator update
 python3 -m venv .venv
 .venv/bin/pip install -e .
 .venv/bin/python -m unittest discover -s tests
+python3 scripts/check_public_repo.py
 ```

@@ -2,8 +2,17 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+!.env.example
 profiles.json
 service.json
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
 output/
 .DS_Store
 *.egg-info/
