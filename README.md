@@ -27,7 +27,7 @@
 
 ## 安装与快速开始
 
-需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。安装页：**https://xiefengbest.github.io/haokan-creator/install.html**（详见 [安装入口](docs/安装入口.md)）。
+需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。安装页（国内）：**https://hk-h5-cdn.levect.com/html/xiefeng/creator/install.html**（详见 [安装入口](docs/安装入口.md)）。
 
 **手动安装** — 复制到终端：
 

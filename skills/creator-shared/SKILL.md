@@ -20,7 +20,7 @@ description: >-
 帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
 ```
 
-收到后按 `~/.haokan-creator/repo/docs/安装指南.md` 逐步执行。用户问能做什么时，阅读 `~/.haokan-creator/repo/docs/使用指南.md`。
+按安装指南执行；克隆目录为 `~/.haokan-creator/repo`。装完后在对话里引导配置；用户问用法时读 `docs/使用指南.md`。
 
 手动安装命令：
 
