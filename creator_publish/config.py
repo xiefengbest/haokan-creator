@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import re
 from dataclasses import dataclass
@@ -22,23 +21,6 @@ def output_dir() -> Path:
     path = data_home() / "output"
     path.mkdir(parents=True, exist_ok=True)
     return path
-
-def service_path() -> Path:
-    return data_home() / "service.json"
-
-
-def load_service() -> dict:
-    path = service_path()
-    if not path.is_file():
-        raise SystemExit("本机还没有服务配置。公开仓库不包含后台地址和 OSS，请联系维护者。")
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise SystemExit("本机服务配置无法读取。") from exc
-    if not isinstance(data, dict):
-        raise SystemExit("本机服务配置无法读取。")
-    return data
-
 
 def load_env_file(path: Path = ENV_PATH) -> None:
     if not path.is_file():
@@ -99,13 +81,18 @@ def load_settings(require_account: bool) -> Settings:
     if square_from not in {"portrait", "landscape"}:
         raise SystemExit("CREATOR_SQUARE_FROM 只能是 portrait 或 landscape")
     album_id = os.environ.get("CREATOR_ALBUM_ID", "").strip()
-    service = load_service() if require_account else {}
-    regions = service.get("regions") if isinstance(service.get("regions"), dict) else {}
-    profile = regions.get(region) if isinstance(regions.get(region), dict) else {}
-    if require_account:
-        needed = ("api", "oss_res", "bucket", "endpoint")
-        if any(not profile.get(key) for key in needed) or not service.get("sts_url") or not service.get("sign_key"):
-            raise SystemExit("本机服务配置不完整。")
+    prefix = "CREATOR_CN" if region == "cn" else "CREATOR_XJP"
+    endpoint_name = {
+        "api": f"{prefix}_API",
+        "oss_res": f"{prefix}_OSS_RES",
+        "bucket": f"{prefix}_BUCKET",
+        "endpoint": f"{prefix}_ENDPOINT",
+    }
+    profile = {key: os.environ.get(name, "").strip() for key, name in endpoint_name.items()}
+    sign_key = os.environ.get("CREATOR_SIGN_KEY", "").strip()
+    sts_url = os.environ.get("CREATOR_STS_URL", "").strip()
+    if require_account and (any(not profile[key] for key in endpoint_name) or not sign_key or not sts_url):
+        raise SystemExit("请在本机 .env 填写后台地址、OSS 和签名。不要提交这个文件。")
     phone = os.environ.get("CREATOR_PHONE", "").strip()
     password = os.environ.get("CREATOR_PASSWORD", "")
     if require_account:
@@ -130,11 +117,11 @@ def load_settings(require_account: bool) -> Settings:
         album_name=os.environ.get("CREATOR_ALBUM_NAME", "").strip(),
         square_from=square_from,
         phone_code=os.environ.get("CREATOR_PHONE_CODE", "+86"),
-        sts_url=str(service.get("sts_url") or ""),
-        sign_key=str(service.get("sign_key") or ""),
-        company_id=int(service.get("company_id") or 0),
-        client_type=int(service.get("client_type") or 0),
-        api_version=str(service.get("api_version") or ""),
+        sts_url=sts_url,
+        sign_key=sign_key,
+        company_id=int(os.environ.get("CREATOR_COMPANY_ID") or 0),
+        client_type=int(os.environ.get("CREATOR_CLIENT_TYPE") or 0),
+        api_version=os.environ.get("CREATOR_API_VERSION", "").strip(),
     )
 
 
