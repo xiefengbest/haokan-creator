@@ -6,11 +6,11 @@
 
 账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。拿到之后只保存在这台电脑。
 
-## 安装
+## 安装和使用
 
-给代理的步骤写在 [安装指南](docs/安装指南.md)。
+安装步骤写在 [安装指南](docs/安装指南.md)：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
 
-https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+装好之后怎么让代理干活，写在 [使用指南](docs/使用指南.md)：https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md
 
 发给编辑的一句话，让他们贴给自己的代理：
 

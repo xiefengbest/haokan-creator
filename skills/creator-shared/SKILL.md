@@ -12,7 +12,7 @@ description: >-
 
 ## 还没安装时
 
-按安装指南逐步执行。安装前阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 。装好后阅读 `~/.haokan-creator/repo/docs/安装指南.md`。
+按安装指南逐步执行。安装前阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 。装好后阅读 `~/.haokan-creator/repo/docs/安装指南.md`。用户问能做什么、怎么发布时，阅读 `~/.haokan-creator/repo/docs/使用指南.md`。
 
 ```bash
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
