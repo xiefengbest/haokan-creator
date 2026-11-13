@@ -15,3 +15,4 @@ https://github.com/xiefengbest/haokan-creator 对所有人公开。
 - 不要从网页或旧提交把配置抄回仓库。
 - 提交前运行 `python3 scripts/check_public_repo.py`。
 - 改完命令或技能后，在仓库根目录运行 `PYTHONPATH=. python3 -m unittest discover -s tests`。
+- **版本**：见 [docs/engineering/版本与发布.md](docs/engineering/版本与发布.md)。有 CLI/安装行为改动时更新 `CHANGELOG.md` 并 bump `pyproject.toml` 的 `version`；push 后跑 haokan-pm-demo 的 `创作者平台/scripts/deploy-demo-to-oss.sh` 同步 CDN `manifest.json`。
