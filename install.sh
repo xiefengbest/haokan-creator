@@ -6,23 +6,71 @@ set -euo pipefail
 export PYTHONDONTWRITEBYTECODE=1
 
 REPO="https://github.com/xiefengbest/haokan-creator.git"
+DIST_URL="${HAOKAN_CREATOR_DIST_URL:-https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/haokan-creator.tar.gz}"
 ROOT="${HAOKAN_CREATOR_HOME:-$HOME/.haokan-creator}"
 SRC="$ROOT/repo"
 
-if ! command -v git >/dev/null 2>&1; then
-  echo "需要先安装 git" >&2
-  exit 1
-fi
 if ! command -v python3 >/dev/null 2>&1; then
   echo "需要先安装 Python 3" >&2
   exit 1
 fi
 
-mkdir -p "$ROOT"
-if [[ ! -d "$SRC/.git" ]]; then
-  git clone "$REPO" "$SRC"
-else
-  git -C "$SRC" pull --ff-only
+fetch_from_cdn() {
+  if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
+    echo "无法访问 GitHub 时需 curl 与 tar，或使用 scripts/install-from-cdn.sh" >&2
+    return 1
+  fi
+  local tmp
+  tmp="$(mktemp -d)"
+  if ! curl -fsSL "$DIST_URL" | tar -xzf - -C "$tmp"; then
+    rm -rf "$tmp"
+    return 1
+  fi
+  if [[ ! -d "$tmp/haokan-creator" ]]; then
+    rm -rf "$tmp"
+    echo "CDN 安装包格式异常" >&2
+    return 1
+  fi
+  rm -rf "$SRC"
+  mkdir -p "$ROOT"
+  mv "$tmp/haokan-creator" "$SRC"
+  rm -rf "$tmp"
+  return 0
+}
+
+sync_source() {
+  mkdir -p "$ROOT"
+  if [[ "${HAOKAN_CREATOR_USE_CDN:-}" == "1" ]]; then
+    fetch_from_cdn || exit 1
+    return
+  fi
+  if [[ -f "$SRC/pyproject.toml" && "${HAOKAN_CREATOR_SKIP_GIT:-}" == "1" ]]; then
+    return
+  fi
+  if [[ -d "$SRC/.git" ]]; then
+    git -C "$SRC" pull --ff-only
+    return
+  fi
+  if [[ -f "$SRC/pyproject.toml" ]]; then
+    return
+  fi
+  if command -v git >/dev/null 2>&1; then
+    if git clone "$REPO" "$SRC" 2>/dev/null; then
+      return
+    fi
+    echo "GitHub 不可用，改从国内 CDN 下载…" >&2
+  fi
+  if fetch_from_cdn; then
+    return
+  fi
+  echo "安装失败：请确认能访问 GitHub，或执行：curl -fsSL https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/install-from-cdn.sh | bash" >&2
+  exit 1
+}
+
+sync_source
+if [[ ! -f "$SRC/install.sh" || ! -f "$SRC/pyproject.toml" ]]; then
+  echo "安装目录不完整" >&2
+  exit 1
 fi
 
 venv_python() {
@@ -107,7 +155,7 @@ for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
   fi
 done
 
-if [[ -f "$SRC/scripts/git-hooks/pre-commit" ]]; then
+if [[ -d "$SRC/.git" && -f "$SRC/scripts/git-hooks/pre-commit" ]]; then
   mkdir -p "$SRC/.git/hooks"
   cp "$SRC/scripts/git-hooks/pre-commit" "$SRC/.git/hooks/pre-commit"
   chmod +x "$SRC/.git/hooks/pre-commit"

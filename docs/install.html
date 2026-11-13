@@ -259,7 +259,12 @@
       </div>
 
       <section class="panel" id="manual" role="tabpanel">
-        <p class="hint">复制以下命令到终端运行（macOS / Linux，需 Git 与 Python 3.9+）</p>
+        <p class="hint"><strong>国内网络（推荐）</strong>：不需访问 GitHub，需 Python 3.9+、curl、tar</p>
+        <div class="code-row">
+          <code id="manual-install-cn">curl -fsSL https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/install-from-cdn.sh | bash</code>
+          <button class="copy" data-target="manual-install-cn" type="button">复制</button>
+        </div>
+        <p class="hint" style="margin-top:18px;text-align:left"><strong>可访问 GitHub 时</strong>：需 Git 与 Python 3.9+</p>
         <div class="code-row">
           <code id="manual-install">git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh</code>
           <button class="copy" data-target="manual-install" type="button">复制</button>
@@ -271,13 +276,13 @@
             <button class="copy" data-target="manual-path" type="button">复制</button>
           </div>
         </div>
-        <p class="note">安装包从 GitHub 拉取。clone 失败请联系谢峰获取离线包。默认国内线路；海外创作者在配置或添加账号时指定区域为 xjp（见安装指南）。</p>
+        <p class="note">国内安装包走好看 CDN。仍失败可联系谢峰获取离线包。海外创作者在配置或添加账号时指定区域为 xjp（见安装指南）。</p>
       </section>
 
       <section class="panel active" id="agent" role="tabpanel">
-        <p class="hint">复制给 Cursor、Codex 等助手。Agent 按安装指南执行即可；约束与发布规则也在指南里。打不开 GitHub 时用「手动安装」。</p>
+        <p class="hint">复制给 Cursor、Codex 等助手。安装指南托管在国内 CDN，Agent 无需访问 GitHub。</p>
         <div class="code-row">
-          <code id="agent-text">帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md</code>
+          <code id="agent-text">帮我安装 Haokan Creator：https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/安装指南.md</code>
           <button class="copy" data-target="agent-text" type="button">复制提示词</button>
         </div>
       </section>
@@ -285,7 +290,7 @@
       <p class="success">
         <strong>✅ 配置完成后，重新打开终端与 Agent</strong> 即可开始使用 →
         <span class="links">
-          <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md">使用指南</a>
+          <a href="https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/使用指南.md">使用指南</a>
           ·
           <a href="https://github.com/xiefengbest/haokan-creator">开源地址</a>
           ·

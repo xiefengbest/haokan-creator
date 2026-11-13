@@ -17,7 +17,7 @@ description: >-
 没装时，用户可以给助手这一句话：
 
 ```text
-帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+帮我安装 Haokan Creator：https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/安装指南.md
 ```
 
 按安装指南执行；克隆目录为 `~/.haokan-creator/repo`。装完后在对话里引导配置；用户问用法时读 `docs/使用指南.md`。
@@ -27,8 +27,10 @@ description: >-
 手动安装命令：
 
 ```bash
-git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
+curl -fsSL https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/install-from-cdn.sh | bash
 ```
+
+可访问 GitHub 时也可：`git clone … && bash install.sh`（见安装指南）。
 
 没有创作者账号、密码或密钥时，请用户联系谢峰申请，不要自己查找或编造。后台配置用 `creator config import <文件>` 导入，用 `creator config status` 检查是否就绪。拿到之后再添加创作者账号。海外创作者用 `--region xjp` 或 `CREATOR_REGION=xjp`。没登录成功之前，不要发布。用户没明确说发布之前，不要上传。
 
