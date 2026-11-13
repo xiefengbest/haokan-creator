@@ -22,7 +22,7 @@ description: >-
 
 按安装指南执行；克隆目录为 `~/.haokan-creator/repo`。装完后在对话里引导配置；用户问用法时读 `docs/使用指南.md`。
 
-若安装失败且出现 `safe-delete`、`broker denied`、`egg-info`，多为 WorkBuddy 等文件代理：请用户在**系统终端**执行安装命令，或安装 uv 后重跑 `install.sh`；对用户用白话说明，不要堆日志。
+多数用户按安装指南第 1 步即可成功。仅当安装失败且日志含 `safe-delete`、`broker denied`、`egg-info` 时，再按少数机器的排障：请用户在**系统终端**执行安装命令，或安装 uv 后重跑 `install.sh`；对用户用白话说明，不要堆日志。
 
 手动安装命令：
 
