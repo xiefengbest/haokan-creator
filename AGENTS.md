@@ -2,7 +2,7 @@
 
 这个仓库照飞书命令行的方式组织：`creator` 是唯一的执行入口，`skills/` 告诉代理何时调用它。不要增加通用接口命令，也不要让代理自己拼创作者后台的请求。
 
-给人用的首页是 [README.md](README.md)。安装步骤在 [docs/安装指南.md](docs/安装指南.md)，用法在 [docs/使用指南.md](docs/使用指南.md)。
+给人用的首页是 [README.md](README.md)。安装步骤在 [docs/安装指南.md](docs/安装指南.md)，用法在 [docs/使用指南.md](docs/使用指南.md)。后台配置模板在 [docs/维护者配置说明.md](docs/维护者配置说明.md)，只给维护者用。
 
 ## 公开仓库
 
