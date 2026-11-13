@@ -12,7 +12,17 @@ description: >-
 
 ## 还没安装时
 
-按安装指南逐步执行。安装前阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md 。装好后阅读 `~/.haokan-creator/repo/docs/安装指南.md`。用户问能做什么、怎么发布时，阅读 `~/.haokan-creator/repo/docs/使用指南.md`。
+安装入口：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装入口.md
+
+没装时，用户可以给助手这一句话：
+
+```text
+帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+```
+
+收到后按 `~/.haokan-creator/repo/docs/安装指南.md` 逐步执行。用户问能做什么时，阅读 `~/.haokan-creator/repo/docs/使用指南.md`。
+
+手动安装命令：
 
 ```bash
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh

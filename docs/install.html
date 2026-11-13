@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>安装 Haokan Creator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2329;
+      --muted: #646a73;
+      --line: #e5e6eb;
+      --primary: #1456f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 48px 20px 64px; }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    .lead { color: var(--muted); margin: 0 0 28px; }
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+    .tab {
+      background: none;
+      border: 0;
+      padding: 0 0 12px;
+      font-size: 15px;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .hint { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .code {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      background: #f8f9fa;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .copy {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .copy:active { transform: scale(0.98); }
+    .footer { margin-top: 24px; font-size: 14px; color: var(--muted); }
+    a { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Haokan Creator</h1>
+    <p class="lead">仅需一行指令，在任意 Agent 使用创作者命令行。</p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="manual" type="button">手动安装</button>
+      <button class="tab" data-tab="agent" type="button">通过 AI Agent 安装</button>
+    </div>
+
+    <section class="panel active" id="manual">
+      <div class="card">
+        <p class="hint">复制以下命令到终端运行即可完成安装：</p>
+        <div class="code">
+          <code id="manual-text">git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh</code>
+          <button class="copy" data-target="manual-text" type="button">复制</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="agent">
+      <div class="card">
+        <p class="hint">将下方提示词复制给你的 AI 助手（Claude Code、Codex、Cursor、Trae 等），它会自动完成安装：</p>
+        <p class="hint" style="margin-bottom:8px">提示词</p>
+        <div class="code">
+          <code id="agent-text">帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md</code>
+          <button class="copy" data-target="agent-text" type="button">复制提示词</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer">
+      安装后请重新打开终端，并阅读
+      <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md">安装指南</a>
+      与
+      <a href="https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md">使用指南</a>
+      。账号、密码和密钥需要联系谢峰申请。
+    </p>
+  </div>
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const panels = document.querySelectorAll(".panel");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((item) => item.classList.remove("active"));
+        panels.forEach((item) => item.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+    document.querySelectorAll(".copy").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const text = document.getElementById(button.dataset.target).textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = button.textContent;
+          button.textContent = "已复制";
+          setTimeout(() => { button.textContent = old; }, 1500);
+        } catch {
+          button.textContent = "请手动复制";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

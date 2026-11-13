@@ -2,7 +2,7 @@
 
 给编辑和代理用的创作者后台命令行。图片从本机直接传到对象存储，不经过别人的服务器。账号保存在 `~/.haokan-creator`。
 
-[安装指南](docs/安装指南.md) · [使用指南](docs/使用指南.md) · [技能说明](skills/) · [安全](#安全)
+[安装入口](docs/安装入口.md) · [安装指南](docs/安装指南.md) · [使用指南](docs/使用指南.md) · [技能说明](skills/) · [安全](#安全)
 
 这个 GitHub 仓库是公开的。账号、密码和密钥需要联系谢峰申请。拿到之后只保存在这台电脑。
 
@@ -27,23 +27,21 @@
 
 ## 安装与快速开始
 
-需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。
+需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。两种装法见 [安装入口](docs/安装入口.md)（也可打开 [docs/install.html](docs/install.html) 复制）。
 
-> 如果你是代理，正在帮用户安装，请直接阅读 [安装指南](docs/安装指南.md) 并按步骤执行。不要跳过申请账号和确认登录。
-
-人类用户可以把下面这句话贴给自己的代理：
-
-```text
-帮我安装并开始使用 Haokan Creator。阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md ，按里面的步骤执行。如果还没有创作者账号、密码或密钥，请我联系谢峰申请，不要自己查找或编造。我没明确说发布之前，不要上传。
-```
-
-也可以自己执行：
+**手动安装** — 复制到终端：
 
 ```bash
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 ```
 
-装好后重新打开终端。登录成功后再发布作品。完整说法见 [使用指南](docs/使用指南.md)。
+**通过 AI Agent 安装** — 复制提示词给 Cursor、Claude Code、Codex、Trae 等：
+
+```text
+帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+```
+
+代理请按链接阅读 [安装指南](docs/安装指南.md) 逐步执行。装好后重新打开终端，用 `creator auth status` 确认能登录。日常用法见 [使用指南](docs/使用指南.md)。
 
 ## 技能说明
 
