@@ -219,12 +219,11 @@ def _update(argv: list[str]) -> int:
     if pull.returncode != 0:
         detail = (pull.stderr or pull.stdout or "git pull 失败").strip()
         return _fail(detail)
-    pip = repo / ".venv" / "bin" / "pip"
-    if pip.is_file():
-        installed = subprocess.run([str(pip), "install", "-e", str(repo)], text=True, capture_output=True)
-        if installed.returncode != 0:
-            detail = (installed.stderr or installed.stdout or "依赖安装失败").strip()
-            return _fail(detail)
+    from creator_publish.venv_install import install_repo_into_venv
+
+    code, detail = install_repo_into_venv(repo)
+    if code != 0:
+        return _fail(detail or "依赖安装失败")
     return _ok({"version": __version__, "message": "已更新。请重新打开代理后再使用。", "git": pull.stdout.strip()})
 
 

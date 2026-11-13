@@ -46,11 +46,11 @@ def _apply_pending(repo: Path, cache_path: Path, *, allow_apply: bool, now: floa
         return "pending"
     if _git(repo, "pull", "--ff-only", runner=runner) != 0:
         return "pending"
-    pip = repo / ".venv" / "bin" / "pip"
-    if pip.is_file():
-        installed = runner([str(pip), "install", "-e", str(repo)], text=True, capture_output=True, timeout=120)
-        if installed.returncode != 0:
-            return "pending"
+    from creator_publish.venv_install import install_repo_into_venv
+
+    code, _detail = install_repo_into_venv(repo, runner=runner)
+    if code != 0:
+        return "pending"
     _write_cache(cache_path, {"checked_at": now, "state": "current"})
     return "updated"
 

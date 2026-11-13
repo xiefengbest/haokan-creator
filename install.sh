@@ -47,21 +47,24 @@ create_venv() {
   python3 -m venv --without-pip "$SRC/.venv"
 }
 
-install_editable() {
+# 不用 pip install -e：企业代理（如 WorkBuddy safe-delete）常拦截 egg-info 临时文件删除。
+install_package() {
   local py
   py="$(venv_python)"
   export PYTHONDONTWRITEBYTECODE=1
 
+  if command -v uv >/dev/null 2>&1; then
+    if uv pip install "$SRC" --python "$py"; then
+      return 0
+    fi
+    echo "uv 安装失败，尝试 pip…" >&2
+  fi
+
   if [[ -x "$SRC/.venv/bin/pip" ]]; then
-    if "$SRC/.venv/bin/pip" install -e "$SRC"; then
+    if "$SRC/.venv/bin/pip" install "$SRC"; then
       return 0
     fi
     echo "pip 安装失败，尝试备用方式…" >&2
-  fi
-
-  if command -v uv >/dev/null 2>&1; then
-    uv pip install -e "$SRC" --python "$py"
-    return 0
   fi
 
   if [[ ! -x "$SRC/.venv/bin/pip" ]]; then
@@ -70,16 +73,18 @@ install_editable() {
       return 1
     fi
     curl -fsSL https://bootstrap.pypa.io/get-pip.py | "$py" -
-    PYTHONDONTWRITEBYTECODE=1 "$SRC/.venv/bin/pip" install -e "$SRC"
+    PYTHONDONTWRITEBYTECODE=1 "$SRC/.venv/bin/pip" install "$SRC"
     return 0
   fi
 
-  echo "依赖安装失败。若本机策略拦截 venv 内删除 .pyc，可先安装 uv 后重跑本脚本。" >&2
+  echo "依赖安装失败。" >&2
+  echo "若日志含 safe-delete、broker denied、egg-info：多为 WorkBuddy 等文件代理拦截。" >&2
+  echo "请在本机「终端」执行同一安装命令（勿在沙箱内），或先安装 uv 后重跑： https://github.com/astral-sh/uv" >&2
   return 1
 }
 
 create_venv
-install_editable
+install_package
 
 mkdir -p "$HOME/.local/bin"
 ln -sfn "$SRC/.venv/bin/creator" "$HOME/.local/bin/creator"
