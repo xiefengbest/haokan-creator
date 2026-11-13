@@ -6,6 +6,7 @@
   <meta name="description" content="一行命令安装 Haokan Creator，支持手动安装与 AI Agent 引导。" />
   <title>安装 Haokan Creator</title>
   <link rel="canonical" href="https://hk-h5-cdn.levect.com/html/xiefeng/creator/install.html" />
+  <link rel="icon" href="https://hk-h5-cdn.levect.com/logo256.png" type="image/png" />
   <style>
     :root {
       color-scheme: light;
@@ -33,18 +34,15 @@
       text-align: center;
     }
     .brand {
+      margin: 0 auto 20px;
+      line-height: 0;
+    }
+    .brand img {
       width: 56px;
       height: 56px;
-      margin: 0 auto 20px;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 1px 2px rgba(31, 35, 41, 0.04);
+      border-radius: 12px;
+      display: block;
     }
-    .brand svg { display: block; }
     h1 {
       font-size: clamp(22px, 4.5vw, 30px);
       font-weight: 600;
@@ -246,11 +244,8 @@
 </head>
 <body>
   <main class="page">
-    <div class="brand" aria-hidden="true">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="6" width="20" height="16" rx="3" stroke="#1456F0" stroke-width="1.75"/>
-        <path d="M9 14h10M14 9v10" stroke="#1456F0" stroke-width="1.75" stroke-linecap="round"/>
-      </svg>
+    <div class="brand">
+      <img src="https://hk-h5-cdn.levect.com/logo256.png" width="56" height="56" alt="好看创作者" />
     </div>
     <h1>仅需一行指令，在任意 Agent 发布创作者作品</h1>
     <p class="lead">安装 Haokan Creator，在本机预览裁切并上传到订阅合辑。</p>
