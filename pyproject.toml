@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "haokan-creator"
+version = "0.1.0"
+description = "Haokan Creator"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "requests>=2.31",
+  "oss2>=2.18",
+  "Pillow>=10.0",
+]
+
+[project.scripts]
+creator = "creator_publish.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["creator_publish*"]
