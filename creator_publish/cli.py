@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 from creator_publish import __version__
 from creator_publish.config import REPO_ROOT, data_home
@@ -27,7 +28,12 @@ def main(argv=None) -> int:
         return 0
     group = argv[0]
     rest = argv[1:]
-    publishing = group == "work" and rest[:1] == ["+publish"] and "--dry-run" not in rest
+    publishing = (
+        group == "work"
+        and rest[:1] == ["+publish"]
+        and "--yes" in rest
+        and "--dry-run" not in rest
+    )
     pending = False
     if group != "update" and not publishing:
         state = _sync(allow_apply=True)
@@ -92,22 +98,46 @@ def _profile(argv: list[str]) -> int:
     add.add_argument("--phone", required=True, help="登录手机号")
     add.add_argument("--region", choices=("cn", "xjp"), default="cn")
     add.add_argument("--password-stdin", action="store_true", help="从标准输入读密码")
+    add.add_argument("--yes", action="store_true", help="用户确认后再保存")
     use = sub.add_parser("use", help="切换默认账号")
     use.add_argument("name")
+    use.add_argument("--yes", action="store_true", help="用户确认后再切换")
     remove = sub.add_parser("remove", help="只从这台电脑删除账号")
     remove.add_argument("name")
+    remove.add_argument("--yes", action="store_true", help="用户确认后再删除")
     args = parser.parse_args(argv)
     if args.action == "list":
         return _ok({"profiles": list_profiles()})
     if args.action == "add":
+        from creator_publish.profiles import mask_phone
+
+        if not args.yes:
+            return _confirm(
+                "新增本机账号",
+                {"name": args.name, "phone": mask_phone(args.phone), "region": args.region},
+                "将在这台电脑保存这个创作者号。不会修改线上资料。",
+            )
         password = sys.stdin.read().strip() if args.password_stdin else ""
         if not args.password_stdin:
             return _fail("请用 --password-stdin 从标准输入提供密码，避免密码出现在命令历史里。")
         add_profile(args.name, args.phone, password, args.region)
         return _ok({"name": args.name, "region": args.region})
     if args.action == "use":
+        if not args.yes:
+            active = next((row["name"] for row in list_profiles() if row["active"]), "")
+            return _confirm(
+                "切换默认账号",
+                {"from": active or "未设置", "to": args.name},
+                "之后没指定账号的命令都会用这个创作者号。",
+            )
         use_profile(args.name)
         return _ok({"active": args.name})
+    if not args.yes:
+        return _confirm(
+            "删除本机账号",
+            {"name": args.name},
+            "只从这台电脑删除登录信息，不删除线上创作者。",
+        )
     remove_profile(args.name)
     return _ok({"removed": args.name})
 
@@ -162,7 +192,8 @@ def _update(argv: list[str]) -> int:
 
 def _work(argv: list[str], profile_name: str | None) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
-        print("creator work +publish --dir <文件夹> --album-id <合辑ID> [--start-date 2026-07-13] [--dry-run]")
+        print("creator work +publish --dir <文件夹> --album-id <合辑ID> [--start-date 2026-07-13]")
+        print("先看基本信息和变动。用户确认后，在原命令末尾加上 --yes 再执行。")
         return 0
     action = argv[0]
     if action != "+publish":
@@ -172,17 +203,18 @@ def _work(argv: list[str], profile_name: str | None) -> int:
     parser.add_argument("--album-id", required=True, help="合辑 ID")
     parser.add_argument("--start-date", help="从这一天起一天一张")
     parser.add_argument("--dry-run", action="store_true", help="只预览，不上传")
+    parser.add_argument("--yes", action="store_true", help="用户确认变动后再发布")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--square-from", choices=("portrait", "landscape"))
     args = parser.parse_args(argv[1:])
     if not args.dir.exists():
         return _fail(f"找不到文件夹：{args.dir}")
-    if not args.dry_run:
-        from creator_publish.profiles import apply_profile
+    from creator_publish.profiles import apply_profile
 
-        apply_profile(profile_name)
+    item = apply_profile(profile_name)
     from creator_publish.pipeline import run
 
+    execute = args.yes and not args.dry_run
     forwarded = ["--inbox", str(args.dir), "--album-id", args.album_id]
     if args.start_date:
         forwarded += ["--start-date", args.start_date]
@@ -190,13 +222,54 @@ def _work(argv: list[str], profile_name: str | None) -> int:
         forwarded += ["--limit", str(args.limit)]
     if args.square_from:
         forwarded += ["--square-from", args.square_from]
-    if not args.dry_run:
+    if execute:
         forwarded.append("--publish")
-    return run(forwarded)
+        return run(forwarded)
+    code = run(forwarded)
+    if code != 0:
+        print("有不能发布的作品，先处理后再确认。", file=sys.stderr)
+        return code
+    if args.dry_run:
+        return 0
+    change = "将把预览通过的作品新发布到这个合辑。已经发过的会跳过。"
+    if args.start_date:
+        change = f"从 {args.start_date} 起按序号一天一张。" + change
+    else:
+        change = "不填写上线日期，发布后立即可见。" + change
+    return _confirm(
+        "发布作品",
+        {
+            "creator": item["name"],
+            "albumId": args.album_id,
+            "dir": str(args.dir),
+            "startDate": args.start_date or "立即发布",
+        },
+        change,
+    )
 
 
 def _later(group: str) -> int:
     return _fail(f"{group} 还没有开放。不要自己请求创作者接口。")
+
+
+def _confirm(action: str, basic: dict, change: str) -> int:
+    print(
+        json.dumps(
+            {
+                "ok": False,
+                "error": {
+                    "type": "confirmation",
+                    "action": action,
+                    "basic": basic,
+                    "change": change,
+                    "hint": "把基本信息和变动告诉用户。用户明确同意后，在原命令末尾加上 --yes 再执行。不要自行加上 --yes。",
+                },
+            },
+            ensure_ascii=False,
+        ),
+        file=sys.stderr,
+    )
+    return 10
 
 
 def _ok(data: dict) -> int:
@@ -222,8 +295,8 @@ def _overview() -> str:
   creator --profile 创作者名 auth status
 
 发布：
-  creator work +publish --dir <文件夹> --album-id <合辑ID> --dry-run
   creator work +publish --dir <文件夹> --album-id <合辑ID> --start-date 2026-07-13
+  creator work +publish --dir <文件夹> --album-id <合辑ID> --start-date 2026-07-13 --yes
 
 更新：
   creator update

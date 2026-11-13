@@ -145,7 +145,7 @@ def _require_works(works: list[Work]) -> list[Work]:
 
 
 def dry_run(works: list[Work], square_from: str) -> int:
-    print("这是预览，没有上传。确认没问题后，加上 --publish 再执行一次")
+    print("这是预览，没有上传。")
     failed = 0
     for index, work in enumerate(works, start=1):
         print(f"\n[{index}/{len(works)}]")

@@ -29,13 +29,13 @@ creator auth status
 
 ## 发布作品
 
-先预览，不上传：
+先看将要发布的内容和基本信息，这一步不会上传：
 
 ```bash
-creator work +publish --dir ~/Downloads/图片文件夹 --album-id 合辑ID --start-date 2026-07-13 --dry-run
+creator work +publish --dir ~/Downloads/图片文件夹 --album-id 合辑ID --start-date 2026-07-13
 ```
 
-编辑确认后，去掉 `--dry-run` 再发布。没写 `--start-date` 就立即发布。写了就从那天 0 点起，按序号一天一张。
+编辑确认变动后，在命令末尾加上 `--yes` 再执行。没写 `--start-date` 就立即发布。写了就从那天 0 点起，按序号一天一张。
 
 图片文件夹用下面任一形式：
 
