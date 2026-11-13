@@ -79,6 +79,8 @@ creator --profile 创作者名 auth status
 creator update
 ```
 
-## 还没有的能力
+## 能力范围
 
-合辑封面和横滑封面、作品换图，还不能用命令行上传。需要时请用户到创作者后台处理。不要自己拼创作者接口。
+**可用命令**（先确认再加 `--yes`）：`creator album list` / `+create` / `+update` / `+delete`；`creator work +publish` / `+update` / `+delete`；`creator me +show` / `+update`。合辑与资料分别读 `creator-album`、`creator-profile`；发布读 `creator-work`。
+
+**还没有**：合辑封面和横滑封面、作品换图，还不能用命令行上传。需要时请用户到创作者后台处理。不要自己拼创作者接口。

@@ -51,8 +51,8 @@ git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/re
 | --- | --- |
 | `creator-shared` | 安装、账号、确认后再执行、更新、公开仓库安全规则 |
 | `creator-work` | 把本机图片预览并发布到已有合辑 |
-| `creator-album` | 合辑尚未开放。遇到时停下来，不要自己请求接口 |
-| `creator-profile` | 线上创作者资料尚未开放。本机账号的添加和切换已可用 |
+| `creator-album` | 合辑查看、新建、改简介与频率、删除（封面图仍去后台） |
+| `creator-profile` | 线上创作者资料查看与修改（头像仅填已有链接；本机账号见 shared） |
 
 ## 命令
 
