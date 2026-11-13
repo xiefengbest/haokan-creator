@@ -71,14 +71,8 @@ creator --profile 创作者名 auth status
 
 ## 更新
 
-- **本机是 GitHub 安装**（`repo/.git` 存在）：跑命令时可能自动 `git pull`（标准错误出现「已自动更新到最新版本」时继续即可）。发布进行中不会中途更新。
-- **本机是 CDN 安装**（无 `.git`）：不要承诺自动更新。让用户执行 `creator update`，或重装 CDN 安装命令（见安装页）。
-
-两种安装均可：
-
-```bash
-creator update
-```
+- 更新统一用 `creator update`：**先 GitHub，不通再走 CDN**。对用户只说「我帮您检查一下有没有新版本」。
+- 有 `.git` 时跑命令可能自动 `git pull`（见标准错误「已自动更新到最新版本」）。发布进行中不会中途更新。
 
 ## 能力范围
 

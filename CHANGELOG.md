@@ -2,6 +2,10 @@
 
 格式基于实际交付日期。**版本号只维护在 `pyproject.toml`。**
 
+## 0.1.3 — 2026-11-13
+
+- `creator update` 与安装拉源码：优先 GitHub，失败回退国内 CDN。
+
 ## 0.1.2 — 2026-11-13
 
 - 文档与安装页：国内 CDN 链接、更新说明（Git 自动更新 vs CDN 用 `creator update` / 重装脚本）。

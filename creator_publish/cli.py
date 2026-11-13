@@ -210,36 +210,39 @@ def _auth(argv: list[str], profile_name: str | None) -> int:
 
 
 def _update(argv: list[str]) -> int:
+    from creator_publish import _version_from_pyproject
+    from creator_publish.upgrade import upgrade_via_cdn, upgrade_via_github
+
     parser = argparse.ArgumentParser(prog="creator update")
     parser.parse_args(argv)
     repo = REPO_ROOT
-    if not (repo / ".git").is_dir():
-        script = repo / "scripts" / "install-from-cdn.sh"
-        if not script.is_file():
-            return _fail("这是从国内 CDN 安装的副本。请重新执行安装页上的 curl 安装命令，或联系谢峰。")
-        proc = subprocess.run(["bash", str(script)], text=True, capture_output=True)
-        if proc.returncode != 0:
-            detail = (proc.stderr or proc.stdout or "CDN 更新失败").strip()
-            return _fail(detail)
-        from creator_publish import _version_from_pyproject
 
+    ok, detail, _via = upgrade_via_github(repo)
+    if ok:
+        payload = {
+            "version": _version_from_pyproject(),
+            "message": "已从 GitHub 更新。请重新打开代理后再使用。",
+            "source": "github",
+        }
+        if detail and "Already up to date" not in detail and "已更新" not in detail:
+            payload["git"] = detail
+        return _ok(payload)
+
+    print("GitHub 更新未成功，尝试国内 CDN…", file=sys.stderr)
+    ok_cdn, detail_cdn = upgrade_via_cdn(repo)
+    if ok_cdn:
         return _ok(
             {
                 "version": _version_from_pyproject(),
                 "message": "已从国内 CDN 更新。请重新打开代理后再使用。",
                 "source": "cdn",
+                "githubError": detail[:200] if detail else "",
             }
         )
-    pull = subprocess.run(["git", "-C", str(repo), "pull", "--ff-only"], text=True, capture_output=True)
-    if pull.returncode != 0:
-        detail = (pull.stderr or pull.stdout or "git pull 失败").strip()
-        return _fail(detail)
-    from creator_publish.venv_install import install_repo_into_venv
-
-    code, detail = install_repo_into_venv(repo)
-    if code != 0:
-        return _fail(detail or "依赖安装失败")
-    return _ok({"version": __version__, "message": "已更新。请重新打开代理后再使用。", "git": pull.stdout.strip()})
+    bits = [detail_cdn]
+    if detail:
+        bits.append(f"GitHub：{detail}")
+    return _fail("；".join(bits))
 
 
 def _work(argv: list[str], profile_name: str | None) -> int:

@@ -61,7 +61,11 @@ sync_source() {
     return
   fi
   if [[ -d "$SRC/.git" ]]; then
-    git -C "$SRC" pull --ff-only
+    if git -C "$SRC" pull --ff-only 2>/dev/null; then
+      return
+    fi
+    echo "GitHub 拉取失败，改从国内 CDN 下载…" >&2
+    fetch_from_cdn || exit 1
     return
   fi
   if [[ -f "$SRC/pyproject.toml" ]]; then
