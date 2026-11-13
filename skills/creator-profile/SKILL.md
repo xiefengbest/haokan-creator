@@ -3,6 +3,9 @@ name: creator-profile
 description: >-
   查看或修改创作者资料，包括头像、简介和社交链接。Use when the user mentions
   创作者资料、头像、简介、社交链接、个人主页。
+metadata:
+  requires:
+    bins: ["creator"]
 ---
 
 # 创作者资料

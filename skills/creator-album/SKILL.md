@@ -3,6 +3,9 @@ name: creator-album
 description: >-
   创作者合辑的查看、新建、修改和删除。Use when the user mentions 合辑、专辑、
   新建合辑、修改合辑简介、更新频率、删除合辑。
+metadata:
+  requires:
+    bins: ["creator"]
 ---
 
 # 合辑

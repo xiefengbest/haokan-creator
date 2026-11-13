@@ -1,4 +1,10 @@
-# 公开仓库
+# 给改这个仓库的代理
+
+这个仓库照飞书命令行的方式组织：`creator` 是唯一的执行入口，`skills/` 告诉代理何时调用它。不要增加通用接口命令，也不要让代理自己拼创作者后台的请求。
+
+给人用的首页是 [README.md](README.md)。安装步骤在 [docs/安装指南.md](docs/安装指南.md)，用法在 [docs/使用指南.md](docs/使用指南.md)。
+
+## 公开仓库
 
 https://github.com/xiefengbest/haokan-creator 对所有人公开。
 
@@ -8,3 +14,4 @@ https://github.com/xiefengbest/haokan-creator 对所有人公开。
 - 报错和日志不能带出密钥或地址。
 - 不要从网页或旧提交把配置抄回仓库。
 - 提交前运行 `python3 scripts/check_public_repo.py`。
+- 改完命令或技能后，在仓库根目录运行 `PYTHONPATH=. python3 -m unittest discover -s tests`。

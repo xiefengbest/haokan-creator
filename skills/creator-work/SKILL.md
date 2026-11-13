@@ -3,11 +3,14 @@ name: creator-work
 description: >-
   把本机图片发布到创作者合辑。Use when the user mentions 传图、发布作品、
   重传图片、一天一张、creator work +publish，或给出一个图片文件夹和合辑。
+metadata:
+  requires:
+    bins: ["creator"]
 ---
 
 # 发布作品
 
-先读 [creator-shared](../creator-shared/SKILL.md)。没有 `creator` 命令时，按那里的一行命令安装。命令提示还没有账号、密码或密钥时，请用户联系谢峰申请，不要继续发布。
+先读 [creator-shared](../creator-shared/SKILL.md)。没有 `creator` 命令时，按安装指南安装。命令提示还没有账号、密码或密钥时，请用户联系谢峰申请，不要继续发布。
 
 ## 发布前确认
 

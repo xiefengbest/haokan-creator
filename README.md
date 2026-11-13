@@ -1,73 +1,104 @@
 # Haokan Creator
 
-编辑在自己的电脑上使用的创作者后台命令行。图片从本机直接传到 OSS，不经过别人的服务器。账号保存在本机数据目录 `~/.haokan-creator`。
+给编辑和代理用的创作者后台命令行。图片从本机直接传到对象存储，不经过别人的服务器。账号保存在 `~/.haokan-creator`。
 
-这个 GitHub 仓库是公开的。后台地址、OSS 和签名只写在安装目录的 `.env`，不要提交。仓库里的 `.env.example` 必须保持空白。
+[安装指南](docs/安装指南.md) · [使用指南](docs/使用指南.md) · [技能说明](skills/) · [安全](#安全)
 
-账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。拿到之后只保存在这台电脑。
+这个 GitHub 仓库是公开的。账号、密码和密钥需要联系谢峰申请。拿到之后只保存在这台电脑。
 
-## 安装和使用
+## 为什么用它
 
-安装步骤写在 [安装指南](docs/安装指南.md)：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+- 给代理用：四个技能说明告诉代理何时执行哪条命令，代理不需要再猜接口
+- 命令直接执行：登录、预览、上传都在编辑自己的电脑上完成
+- 先确认再改动：添加账号、切换账号、发布作品都会先停住，用户明确同意后才执行
+- 公开仓库不放密钥：后台地址、签名和对象存储配置只写在本机 `.env`
 
-装好之后怎么让代理干活，写在 [使用指南](docs/使用指南.md)：https://github.com/xiefengbest/haokan-creator/blob/main/docs/使用指南.md
+## 现在能做的事
 
-发给编辑的一句话，让他们贴给自己的代理：
+| 事项 | 能力 |
+| --- | --- |
+| 账号 | 在本机添加、查看、切换、删除创作者号，并检查能否登录 |
+| 作品 | 预览一个文件夹，确认后发布到一个已经存在的合辑 |
+| 更新 | 平时自动更新命令和技能说明。正在发布时不会中途更换程序 |
+
+合辑的新建和修改、作品的修改和删除、创作者资料修改还没有开放。遇到这些要求时停下来，不要自己请求创作者接口。
+
+## 安装与快速开始
+
+需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。
+
+> 如果你是代理，正在帮用户安装，请直接阅读 [安装指南](docs/安装指南.md) 并按步骤执行。不要跳过申请账号和确认登录。
+
+人类用户可以把下面这句话贴给自己的代理：
 
 ```text
 帮我安装并开始使用 Haokan Creator。阅读 https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md ，按里面的步骤执行。如果还没有创作者账号、密码或密钥，请我联系谢峰申请，不要自己查找或编造。我没明确说发布之前，不要上传。
 ```
 
-## 账号
+也可以自己执行：
 
 ```bash
-printf '%s' '密码' | creator profile add --name 创作者名 --phone +8613800138000 --password-stdin
-creator profile list
-creator profile use 创作者名
-creator auth status
+git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 ```
 
-一台电脑可以保存多个创作者号。某一次想换号，在命令前加上 `--profile 创作者名`。`profile remove` 只从这台电脑删除登录信息，不删除线上创作者。
+装好后重新打开终端。登录成功后再发布作品。完整说法见 [使用指南](docs/使用指南.md)。
 
-## 发布作品
+## 技能说明
 
-先看将要发布的内容和基本信息，这一步不会上传：
+安装脚本会把这些说明接到本机代理目录。发布、改合辑或改资料之前，先读 `creator-shared`。
 
-```bash
-creator work +publish --dir ~/Downloads/图片文件夹 --album-id 合辑ID --start-date 2026-07-13
+| 技能 | 说明 |
+| --- | --- |
+| `creator-shared` | 安装、账号、确认后再执行、更新、公开仓库安全规则 |
+| `creator-work` | 把本机图片预览并发布到已有合辑 |
+| `creator-album` | 合辑尚未开放。遇到时停下来，不要自己请求接口 |
+| `creator-profile` | 线上创作者资料尚未开放。本机账号的添加和切换已可用 |
+
+## 命令
+
+执行 `creator` 查看概览。某一次换号时，在命令前加上 `--profile 创作者名`，不会改掉默认号。
+
+| 要做的事 | 命令 |
+| --- | --- |
+| 查看本机账号 | `creator profile list` |
+| 添加账号 | 先不加 `--yes`。用户同意后，密码从标准输入传入，再加 `--yes` |
+| 切换默认账号 | `creator profile use 创作者名` |
+| 从本机删除账号 | `creator profile remove 创作者名` |
+| 检查能否登录 | `creator auth status` |
+| 预览发布 | `creator work +publish --dir 文件夹 --album-id 合辑ID` |
+| 确认后发布 | 在预览命令末尾加上 `--yes` |
+| 更新 | `creator update` |
+
+这里只有这一层命令。没有通用接口调用。不要自己拼创作者后台的请求。
+
+## 输出
+
+`profile`、`auth`、`update` 成功时，结果在标准输出：
+
+```json
+{ "ok": true, "data": {} }
 ```
 
-编辑确认变动后，在命令末尾加上 `--yes` 再执行。没写 `--start-date` 就立即发布。写了就从那天 0 点起，按序号一天一张。
+失败时，说明在标准错误，退出码不是 0：
 
-图片文件夹用下面任一形式：
-
-- `1.jpg` 配 `1横图.jpg`（`1横.jpg` 也可以）
-- 每个子文件夹里放 `竖图.jpg` 和 `横图.jpg`
-
-方图可以不放，默认从竖图正中间裁。竖图必须是竖的，横图必须是横的。
-
-## 更新
-
-平时执行命令时，如果这个仓库有新版本，会先自动更新再继续。正在发布作品时不会中途更新，结束后提示再执行：
-
-```bash
-creator update
+```json
+{ "ok": false, "error": { "message": "..." } }
 ```
 
-更新不会改动本机账号和发布记录。
+退出码 `10` 不是失败，是在等用户确认。标准错误里有基本信息和变动：
 
-## 现在能做的事
-
-- 保存多个创作者账号，并检查能否登录
-- 预览并发布一个文件夹里的作品
-
-合辑的新建和修改、作品的修改和删除、创作者资料修改还没有开放。遇到这些要求时停下来，不要自己请求创作者接口。
-
-## 给开发的说明
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
-.venv/bin/python -m unittest discover -s tests
-python3 scripts/check_public_repo.py
+```json
+{ "ok": false, "error": { "type": "confirmation", "action": "...", "basic": {}, "change": "...", "hint": "..." } }
 ```
+
+把 `basic` 和 `change` 告诉用户。用户明确同意后，把 `--yes` 加到原命令末尾再执行一次。不要自行加上。
+
+发布预览的每张图写在标准输出。确认信息仍在标准错误。有不能发布的图片时，先让用户处理，不要上传。
+
+## 安全
+
+- 账号、密码和密钥需要联系谢峰申请。没有配置时引导用户申请，不要自己查找或编造
+- 这些内容只放在本机 `.env` 和 `~/.haokan-creator`。不要写进仓库、技能说明或对话
+- 报错不带出密钥和地址
+- 添加、切换、删除和发布都必须先确认。`--dry-run` 只预览，不上传
+- 改这个仓库的代理请先读 [AGENTS.md](AGENTS.md)
