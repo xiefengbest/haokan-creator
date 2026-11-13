@@ -6,9 +6,9 @@ set -euo pipefail
 export PYTHONDONTWRITEBYTECODE=1
 
 REPO="https://github.com/xiefengbest/haokan-creator.git"
-DIST_URL="${HAOKAN_CREATOR_DIST_URL:-https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/haokan-creator.tar.gz}"
 ROOT="${HAOKAN_CREATOR_HOME:-$HOME/.haokan-creator}"
 SRC="$ROOT/repo"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "需要先安装 Python 3" >&2
@@ -20,9 +20,24 @@ fetch_from_cdn() {
     echo "无法访问 GitHub 时需 curl 与 tar，或使用 scripts/install-from-cdn.sh" >&2
     return 1
   fi
+  local dist_url label
+  if [[ -f "$SCRIPT_DIR/scripts/cdn-dist.sh" ]]; then
+    # shellcheck source=scripts/cdn-dist.sh
+    source "$SCRIPT_DIR/scripts/cdn-dist.sh"
+    dist_url="$(cdn_resolve_tarball_url)" || return 1
+    label="$(cdn_manifest_label 2>/dev/null || true)"
+  elif [[ -n "${HAOKAN_CREATOR_DIST_URL:-}" ]]; then
+    dist_url="$HAOKAN_CREATOR_DIST_URL"
+  else
+    echo "缺少 scripts/cdn-dist.sh，请用 install-from-cdn.sh 更新" >&2
+    return 1
+  fi
+  if [[ -n "$label" ]]; then
+    echo "从 CDN 下载版本 ${label}…" >&2
+  fi
   local tmp
   tmp="$(mktemp -d)"
-  if ! curl -fsSL "$DIST_URL" | tar -xzf - -C "$tmp"; then
+  if ! curl -fsSL "$dist_url" | tar -xzf - -C "$tmp"; then
     rm -rf "$tmp"
     return 1
   fi

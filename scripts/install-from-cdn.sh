@@ -4,7 +4,25 @@ set -euo pipefail
 
 ROOT="${HAOKAN_CREATOR_HOME:-$HOME/.haokan-creator}"
 SRC="$ROOT/repo"
-DIST_URL="${HAOKAN_CREATOR_DIST_URL:-https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/haokan-creator.tar.gz}"
+CDN_DIST_DEFAULT="https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist"
+
+_load_cdn_dist() {
+  local here=""
+  if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  fi
+  if [[ -n "$here" && -f "$here/cdn-dist.sh" ]]; then
+    # shellcheck source=cdn-dist.sh
+    source "$here/cdn-dist.sh"
+    return 0
+  fi
+  local helper
+  helper="$(mktemp)"
+  curl -fsSL "${HAOKAN_CREATOR_CDN_DIST:-$CDN_DIST_DEFAULT}/cdn-dist.sh" -o "$helper"
+  # shellcheck source=/dev/null
+  source "$helper"
+  rm -f "$helper"
+}
 
 if ! command -v curl >/dev/null 2>&1; then
   echo "需要先安装 curl" >&2
@@ -19,11 +37,19 @@ if ! command -v tar >/dev/null 2>&1; then
   exit 1
 fi
 
+_load_cdn_dist
+
+DIST_URL="$(cdn_resolve_tarball_url)" || {
+  echo "无法读取 CDN manifest（$(cdn_manifest_url)）" >&2
+  exit 1
+}
+LABEL="$(cdn_manifest_label 2>/dev/null || true)"
+
 mkdir -p "$ROOT"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-echo "正在从国内 CDN 下载安装包…"
+echo "正在从国内 CDN 下载安装包${LABEL:+（版本 ${LABEL}）}…"
 if ! curl -fsSL "$DIST_URL" | tar -xzf - -C "$tmp"; then
   echo "下载失败。若公司网络限制，请联系谢峰获取离线包。" >&2
   exit 1
