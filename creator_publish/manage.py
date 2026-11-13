@@ -83,17 +83,55 @@ def work_summary(row: dict, group_id: str) -> dict:
     }
 
 
-def pick_cover(sizes: list[dict]) -> dict:
+def _cover_match(sizes: list[dict]) -> tuple[int, str, int] | None:
     for size_type, work_type in COVER_CANDIDATES:
         for item in sizes:
             filename = str(item.get("imageFilename") or "").strip()
             if item.get("imageSizeType") == size_type and filename:
-                return {
-                    "filename": filename,
-                    "width": item.get("imageWidth") or 0,
-                    "height": item.get("imageHeight") or 0,
-                    "workType": work_type,
-                }
+                return size_type, filename, work_type
+    return None
+
+
+def annotate_size_rows(sizes: list[dict]) -> list[dict]:
+    match = _cover_match(sizes)
+    cover_type = match[0] if match else None
+    cover_name = match[1] if match else ""
+    rows: list[dict] = []
+    for item in sizes:
+        row = dict(item)
+        filename = str(item.get("imageFilename") or "").strip()
+        row["isCover"] = bool(
+            cover_type is not None
+            and item.get("imageSizeType") == cover_type
+            and filename
+            and filename == cover_name
+        )
+        rows.append(row)
+    return rows
+
+
+def work_info_missing(info: dict, group_id: str) -> bool:
+    if not isinstance(info, dict) or not info:
+        return True
+    if any(info.get(key) not in (None, "", [], {}) for key in ("content", "albums", "startTime", "endTime", "coverUrl")):
+        return False
+    gid = str(info.get("groupId") or info.get("imageGroupId") or info.get("imageId") or "").strip()
+    return not gid or gid != str(group_id)
+
+
+def pick_cover(sizes: list[dict]) -> dict:
+    match = _cover_match(sizes)
+    if not match:
+        raise SystemExit("没有读到这件作品的封面，暂时不能只改文字。请到创作者后台里修改图片。")
+    size_type, filename, work_type = match
+    for item in sizes:
+        if item.get("imageSizeType") == size_type and str(item.get("imageFilename") or "").strip() == filename:
+            return {
+                "filename": filename,
+                "width": item.get("imageWidth") or 0,
+                "height": item.get("imageHeight") or 0,
+                "workType": work_type,
+            }
     raise SystemExit("没有读到这件作品的封面，暂时不能只改文字。请到创作者后台里修改图片。")
 
 

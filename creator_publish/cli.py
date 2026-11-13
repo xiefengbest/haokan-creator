@@ -210,7 +210,6 @@ def _auth(argv: list[str], profile_name: str | None) -> int:
 
 
 def _update(argv: list[str]) -> int:
-    from creator_publish import _version_from_pyproject
     from creator_publish.upgrade import upgrade_via_cdn, upgrade_via_github
 
     parser = argparse.ArgumentParser(prog="creator update")
@@ -220,7 +219,7 @@ def _update(argv: list[str]) -> int:
     ok, detail, _via = upgrade_via_github(repo)
     if ok:
         payload = {
-            "version": _version_from_pyproject(),
+            "version": __version__,
             "message": "已从 GitHub 更新。请重新打开代理后再使用。",
             "source": "github",
         }
@@ -233,7 +232,7 @@ def _update(argv: list[str]) -> int:
     if ok_cdn:
         return _ok(
             {
-                "version": _version_from_pyproject(),
+                "version": __version__,
                 "message": "已从国内 CDN 更新。请重新打开代理后再使用。",
                 "source": "cdn",
                 "githubError": detail[:200] if detail else "",
@@ -247,7 +246,7 @@ def _update(argv: list[str]) -> int:
 
 def _work(argv: list[str], profile_name: str | None) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
-        print("creator work +publish --dir <文件夹> --album-id <合辑ID> [--start-date 2026-07-13]")
+        print("creator work +publish --dir <文件夹> --album-id <合辑ID> [--content 描述] [--start-date 2026-07-13]")
         print("creator work +update --group-id <作品ID> [--content 描述] [--album-id <合辑ID>]")
         print("creator work +delete --group-id <作品ID>")
         print("先看基本信息和变动。用户确认后，在原命令末尾加上 --yes 再执行。")
@@ -267,6 +266,7 @@ def _publish(argv: list[str], profile_name: str | None) -> int:
     parser.add_argument("--dir", required=True, type=Path, help="图片文件夹")
     parser.add_argument("--album-id", required=True, help="合辑 ID")
     parser.add_argument("--start-date", help="从这一天起一天一张")
+    parser.add_argument("--content", help="作品描述（最多 100 字），会覆盖资料夹里的描述.txt")
     parser.add_argument("--dry-run", action="store_true", help="只预览，不上传")
     parser.add_argument("--yes", action="store_true", help="用户确认变动后再发布")
     parser.add_argument("--limit", type=int, default=0)
@@ -274,6 +274,8 @@ def _publish(argv: list[str], profile_name: str | None) -> int:
     args = parser.parse_args(argv)
     if not args.dir.exists():
         return _fail(f"找不到文件夹：{args.dir}")
+    if args.content is not None and len(args.content.strip()) > 100:
+        return _fail("作品描述不能超过 100 个字。")
     from creator_publish.profiles import apply_profile
 
     item = apply_profile(profile_name)
@@ -287,6 +289,8 @@ def _publish(argv: list[str], profile_name: str | None) -> int:
         forwarded += ["--limit", str(args.limit)]
     if args.square_from:
         forwarded += ["--square-from", args.square_from]
+    if args.content is not None:
+        forwarded += ["--content", args.content.strip()]
     if execute:
         forwarded.append("--publish")
         return run(forwarded)
@@ -486,8 +490,6 @@ def _update_work(argv: list[str], profile_name: str | None) -> int:
         _, client = _login(profile_name)
         rows = client.list_works(args.group_id)
         info = client.work_info(args.group_id)
-        if not rows and not info:
-            return _fail(f"没有找到作品 {args.group_id}。")
         summary = work_summary(rows[0] if rows else info, args.group_id)
         current_albums = album_ids_from_info(info) or summary.get("album", "")
         next_content = (args.content if args.content is not None else summary["content"]).strip()

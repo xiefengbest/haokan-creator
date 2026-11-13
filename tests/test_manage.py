@@ -1,11 +1,13 @@
 import unittest
 
 from creator_publish.manage import (
+    annotate_size_rows,
     creator_row,
     parse_frequency,
     schedule_day_bounds,
     schedule_ms,
     social_change,
+    work_info_missing,
     work_update_body,
 )
 
@@ -54,6 +56,20 @@ class ManageTests(unittest.TestCase):
     def test_social_change_requires_pair(self):
         with self.assertRaises(SystemExit):
             social_change("xiaohongshu", None, False)
+
+    def test_annotate_size_rows_marks_cover(self):
+        sizes = [
+            {"imageSizeType": 7, "imageFilename": "cover.jpg", "imageWidth": 10, "imageHeight": 20},
+            {"imageSizeType": 1, "imageFilename": "other.jpg"},
+        ]
+        rows = annotate_size_rows(sizes)
+        self.assertTrue(rows[0]["isCover"])
+        self.assertFalse(rows[1]["isCover"])
+
+    def test_work_info_missing(self):
+        self.assertTrue(work_info_missing({}, "9"))
+        self.assertFalse(work_info_missing({"groupId": "9"}, "9"))
+        self.assertTrue(work_info_missing({"groupId": "8"}, "9"))
 
 
 if __name__ == "__main__":

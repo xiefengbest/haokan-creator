@@ -259,6 +259,8 @@ class CreatorClient:
         return rows if isinstance(rows, list) else []
 
     def work_info(self, group_id: str) -> dict:
+        from creator_publish.manage import work_info_missing
+
         data = self.post(
             "/creator/works/info/v1",
             {"imageGroupId": group_id, "listType": 1},
@@ -266,9 +268,25 @@ class CreatorClient:
         )
         _, body = unwrap(data)
         result = body.get("result") or body
-        return result if isinstance(result, dict) else {}
+        if not isinstance(result, dict):
+            result = {}
+        if work_info_missing(result, group_id):
+            raise ApiError(
+                "查看作品",
+                {
+                    "header": {},
+                    "body": {
+                        "msg": f"作品 {group_id} 不存在或已删除",
+                        "missing": True,
+                        "imageGroupId": group_id,
+                    },
+                },
+            )
+        return result
 
     def work_sizes(self, group_id: str) -> list[dict]:
+        from creator_publish.manage import annotate_size_rows
+
         data = self.post(
             "/creator/social/imagesizelist",
             {"imageGroupId": group_id},
@@ -276,7 +294,9 @@ class CreatorClient:
         )
         _, body = unwrap(data)
         rows = body.get("list") or body.get("result") or []
-        return rows if isinstance(rows, list) else []
+        if not isinstance(rows, list):
+            return []
+        return annotate_size_rows(rows)
 
     def update_work(self, body: dict) -> str:
         result = self.post("/creator/social/releaseimage", body, action="修改作品")

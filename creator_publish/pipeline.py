@@ -49,6 +49,7 @@ def run(argv=None) -> int:
     parser.add_argument("--square-from", choices=("portrait", "landscape"), help="没有方图时从竖图或横图裁")
     parser.add_argument("--album-id", help="这次发布的合辑 ID")
     parser.add_argument("--start-date", help="从这一天起按序号一天一张，例如 2026-07-13")
+    parser.add_argument("--content", help="覆盖每件作品的描述（最多 100 字）")
     args = parser.parse_args(argv)
     if args.album_id:
         os.environ["CREATOR_ALBUM_ID"] = args.album_id.strip()
@@ -69,6 +70,11 @@ def run(argv=None) -> int:
 
     try:
         works = discover(args)
+        if args.content is not None:
+            text = args.content.strip()
+            if len(text) > 100:
+                raise PlanError("作品描述不能超过 100 字")
+            works = [replace(work, content=text) for work in works]
         if args.start_date:
             works = schedule_daily(works, args.start_date)
     except PlanError as exc:

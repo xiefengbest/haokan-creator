@@ -19,8 +19,10 @@ metadata:
 ## 发布
 
 ```bash
-creator work +publish --dir <文件夹> --album-id <合辑ID> --start-date 2026-07-13
+creator work +publish --dir <文件夹> --album-id <合辑ID> --content 作品描述 --start-date 2026-07-13
 ```
+
+描述也可写在文件夹里的 `描述.txt`；`--content` 会覆盖 `描述.txt`。
 
 这条命令只预览，不上传。用户明确同意后，在命令末尾加上 `--yes`。
 
