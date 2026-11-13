@@ -251,6 +251,12 @@
     </div>
     <h1>仅需一行指令，在任意 Agent 发布创作者作品</h1>
     <p class="lead">安装 Haokan Creator，服务国内与海外创作者，在本机预览裁切并上传到订阅合辑。</p>
+    <p class="note" id="install-requirements" style="text-align:center;margin:-8px auto 8px;max-width:560px">
+      <strong>系统要求</strong>：macOS 或 Linux（不支持 Windows）· Python 3.9+ · curl、tar（国内安装）
+    </p>
+    <p class="note" id="install-version" style="text-align:center;margin:0 auto 16px;max-width:560px;font-size:13px;color:#64748b">
+      正在读取当前发布版本…
+    </p>
 
     <div class="install-box">
       <div class="tabs" role="tablist">
@@ -276,7 +282,7 @@
             <button class="copy" data-target="manual-path" type="button">复制</button>
           </div>
         </div>
-        <p class="note">国内安装包走好看 CDN。仍失败可联系谢峰获取离线包。海外创作者在配置或添加账号时指定区域为 xjp（见安装指南）。</p>
+        <p class="note">国内安装包走好看 CDN。仍失败可联系谢峰获取离线包。海外创作者在配置或添加账号时指定区域为 xjp（见安装指南）。更新：再跑国内安装命令，或执行 <code>creator update</code>。</p>
       </section>
 
       <section class="panel active" id="agent" role="tabpanel">
@@ -300,7 +306,10 @@
     </div>
 
     <section class="agents" aria-label="支持的 Agent">
-      <h2>支持所有主流 AI Agent 工具</h2>
+      <h2>支持 Cursor 等常见 AI Agent</h2>
+      <p class="note" style="text-align:center;margin:0 0 16px;max-width:520px;margin-left:auto;margin-right:auto;font-size:13px">
+        安装后默认把技能接到 <code>~/.cursor/skills</code> 与 <code>~/.agents/skills</code>。其它工具请让 Agent 按安装指南读取仓库内 <code>skills/</code>。
+      </p>
       <div class="agent-grid">
         <div class="agent-item"><span class="agent-mark">CC</span>Claude Code</div>
         <div class="agent-item"><span class="agent-mark">CX</span>Codex</div>
@@ -355,6 +364,18 @@
       });
     });
     document.querySelectorAll(".tab.active").forEach((t) => t.setAttribute("aria-selected", "true"));
+    (function loadReleaseInfo() {
+      const el = document.getElementById("install-version");
+      if (!el) return;
+      fetch("https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/manifest.json", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((m) => {
+          const ver = m.version || "";
+          const commit = m.commit || "";
+          el.textContent = ver && commit ? `当前发布：${ver}（${commit}）` : "当前发布：" + (commit || ver || "见 manifest");
+        })
+        .catch(() => { el.textContent = "当前发布见 dist/manifest.json"; });
+    })();
     document.querySelectorAll(".copy").forEach((button) => {
       button.addEventListener("click", async () => {
         const el = document.getElementById(button.dataset.target);

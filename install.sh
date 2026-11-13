@@ -10,10 +10,8 @@ ROOT="${HAOKAN_CREATOR_HOME:-$HOME/.haokan-creator}"
 SRC="$ROOT/repo"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "需要先安装 Python 3" >&2
-  exit 1
-fi
+# shellcheck source=scripts/check-python.sh
+source "$SCRIPT_DIR/scripts/check-python.sh"
 
 fetch_from_cdn() {
   if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
@@ -152,6 +150,7 @@ install_package
 mkdir -p "$HOME/.local/bin"
 ln -sfn "$SRC/.venv/bin/creator" "$HOME/.local/bin/creator"
 
+echo "技能说明已接到：~/.cursor/skills、~/.agents/skills（其它 Agent 请手动复制 skills/ 或让助手读取仓库内 SKILL.md）"
 for agent in "$HOME/.cursor/skills" "$HOME/.agents/skills"; do
   mkdir -p "$agent"
   for skill in creator-shared creator-work creator-album creator-profile; do

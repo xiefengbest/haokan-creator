@@ -32,6 +32,13 @@ if ! command -v python3 >/dev/null 2>&1; then
   echo "需要先安装 Python 3" >&2
   exit 1
 fi
+_check_py() {
+  python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)' 2>/dev/null || {
+    echo "需要 Python 3.9 或更新版本（当前：$(python3 --version 2>&1)）" >&2
+    exit 1
+  }
+}
+_check_py
 if ! command -v tar >/dev/null 2>&1; then
   echo "需要先安装 tar" >&2
   exit 1

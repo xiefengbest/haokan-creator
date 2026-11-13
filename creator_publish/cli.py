@@ -214,7 +214,22 @@ def _update(argv: list[str]) -> int:
     parser.parse_args(argv)
     repo = REPO_ROOT
     if not (repo / ".git").is_dir():
-        return _fail("这不是从 GitHub 安装的副本，无法更新。")
+        script = repo / "scripts" / "install-from-cdn.sh"
+        if not script.is_file():
+            return _fail("这是从国内 CDN 安装的副本。请重新执行安装页上的 curl 安装命令，或联系谢峰。")
+        proc = subprocess.run(["bash", str(script)], text=True, capture_output=True)
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or "CDN 更新失败").strip()
+            return _fail(detail)
+        from creator_publish import _version_from_pyproject
+
+        return _ok(
+            {
+                "version": _version_from_pyproject(),
+                "message": "已从国内 CDN 更新。请重新打开代理后再使用。",
+                "source": "cdn",
+            }
+        )
     pull = subprocess.run(["git", "-C", str(repo), "pull", "--ff-only"], text=True, capture_output=True)
     if pull.returncode != 0:
         detail = (pull.stderr or pull.stdout or "git pull 失败").strip()

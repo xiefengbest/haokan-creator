@@ -2,6 +2,11 @@
 
 格式基于实际交付日期。**版本号只维护在 `pyproject.toml`。**
 
+## 0.1.2 — 2026-11-13
+
+- 文档与安装页：国内 CDN 链接、更新说明（Git 自动更新 vs CDN 用 `creator update` / 重装脚本）。
+- `creator update` 支持 CDN 安装副本；Python 3.9+ 检查；打包排除 `._*` / `.DS_Store`；`haokan-creator.tar.gz` 与当前版本包同步。
+
 ## 0.1.1 — 2026-11-13
 
 - 按天排期发布同时提交当天 `endTime`（23:59:59）。

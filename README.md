@@ -21,7 +21,7 @@
 | 合辑 | 查看、新建、修改名称/简介/更新频率、删除 |
 | 作品 | 预览并发布；修改描述/合辑/上线时间；删除 |
 | 资料 | 查看和修改昵称、简介、头像链接、一条社交链接 |
-| 更新 | 平时自动更新命令和技能说明。正在发布时不会中途更换程序 |
+| 更新 | Git 安装可自动检测 GitHub 更新；CDN 安装用 `creator update` 或重装 CDN 脚本 |
 
 合辑封面和横滑封面、作品换图还不能用命令行上传，需要到创作者后台处理。
 
@@ -29,7 +29,13 @@
 
 需要 Git、Python 3.9 或更新版本，以及 macOS 或 Linux。安装页（国内）：**https://hk-h5-cdn.levect.com/html/xiefeng/creator/install.html**（详见 [安装入口](docs/安装入口.md)）。
 
-**手动安装** — 复制到终端：
+**国内安装（推荐）**：
+
+```bash
+curl -fsSL https://hk-h5-cdn.levect.com/html/xiefeng/creator/dist/install-from-cdn.sh | bash
+```
+
+**GitHub 安装**（可访问 GitHub 时）：
 
 ```bash
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
@@ -38,10 +44,10 @@ git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/re
 **通过 AI Agent 安装** — 复制提示词给 Cursor、Claude Code、Codex、Trae 等：
 
 ```text
-帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
+帮我安装 Haokan Creator：https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/安装指南.md
 ```
 
-代理请按链接阅读 [安装指南](docs/安装指南.md) 逐步执行。装好后执行 `creator config import <谢峰提供的文件>` 和 `creator config status`，再执行 `creator auth status` 确认能登录。日常用法见 [使用指南](docs/使用指南.md)。
+代理请按 CDN 上的 [安装指南](https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/安装指南.md) 逐步执行。装好后执行 `creator config import <谢峰提供的文件>` 和 `creator config status`，再执行 `creator auth status` 确认能登录。日常用法见 [使用指南](https://hk-h5-cdn.levect.com/html/xiefeng/creator/docs/使用指南.md)。
 
 ## 技能说明
 
