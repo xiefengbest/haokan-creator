@@ -28,7 +28,7 @@ description: >-
 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 ```
 
-没有创作者账号、密码或密钥时，请用户联系谢峰申请，不要自己查找或编造。拿到之后再添加到本机。没登录成功之前，不要发布。用户没明确说发布之前，不要上传。
+没有创作者账号、密码或密钥时，请用户联系谢峰申请，不要自己查找或编造。后台配置用 `creator config import <文件>` 导入，用 `creator config status` 检查是否就绪。拿到之后再添加创作者账号。没登录成功之前，不要发布。用户没明确说发布之前，不要上传。
 
 ## 账号
 

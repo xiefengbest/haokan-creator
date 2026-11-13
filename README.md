@@ -41,7 +41,7 @@ git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/re
 帮我安装 Haokan Creator：https://github.com/xiefengbest/haokan-creator/blob/main/docs/安装指南.md
 ```
 
-代理请按链接阅读 [安装指南](docs/安装指南.md) 逐步执行。装好后重新打开终端，用 `creator auth status` 确认能登录。日常用法见 [使用指南](docs/使用指南.md)。
+代理请按链接阅读 [安装指南](docs/安装指南.md) 逐步执行。装好后执行 `creator config import <谢峰提供的文件>` 和 `creator config status`，再执行 `creator auth status` 确认能登录。日常用法见 [使用指南](docs/使用指南.md)。
 
 ## 技能说明
 

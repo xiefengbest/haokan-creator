@@ -54,7 +54,7 @@ def run(argv=None) -> int:
         os.environ["CREATOR_ALBUM_ID"] = args.album_id.strip()
 
     publishing = args.publish or args.retry_pending
-    settings = load_settings(require_account=publishing)
+    settings = load_settings(require_account=publishing, require_album=publishing)
     if args.square_from:
         settings = replace(settings, square_from=args.square_from)
 

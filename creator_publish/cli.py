@@ -48,6 +48,8 @@ def main(argv=None) -> int:
             code = _album(rest, profile_name)
         elif group == "me":
             code = _me(rest, profile_name)
+        elif group == "config":
+            code = _config(rest)
         else:
             print(_overview())
             return 2
@@ -74,6 +76,23 @@ def _online_write(group: str, rest: list[str]) -> bool:
     if group == "album" and action in (["+create"], ["+update"], ["+delete"]):
         return True
     return group == "me" and action == ["+update"]
+
+
+def _config(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(prog="creator config")
+    sub = parser.add_subparsers(dest="action", required=True)
+    sub.add_parser("status", help="检查本机后台配置是否齐全")
+    import_cmd = sub.add_parser("import", help="导入谢峰提供的 backend.env")
+    import_cmd.add_argument("file", type=Path, help="配置文件路径")
+    args = parser.parse_args(argv)
+    from creator_publish.config_cmd import describe_status, import_backend, inspect_backend
+
+    if args.action == "status":
+        payload = inspect_backend()
+        payload["message"] = describe_status(payload)
+        return _ok(payload)
+    target = import_backend(args.file.expanduser().resolve())
+    return _ok({"backendEnv": str(target), "imported": True, "message": "后台配置已导入。请执行 creator auth status 确认能登录。"})
 
 
 def _login(profile_name: str | None):
@@ -675,6 +694,10 @@ def _overview() -> str:
   git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 
 账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。
+
+后台配置：
+  creator config status
+  creator config import <谢峰提供的文件>
 
 账号：
   creator profile list
