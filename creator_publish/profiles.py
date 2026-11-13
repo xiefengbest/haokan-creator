@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 
-from creator_publish.config import data_home
+from creator_publish.config import APPLY_HINT, data_home
 
 
 def profiles_path() -> Path:
@@ -97,7 +97,7 @@ def resolve_profile(name: str | None) -> dict:
     data = load_store()
     profiles = data.get("profiles", {})
     if not profiles:
-        raise SystemExit("还没有创作者账号。先执行 creator profile add。")
+        raise SystemExit(f"还没有创作者账号。{APPLY_HINT} 拿到之后执行 creator profile add。")
     chosen = (name or "").strip() or (data.get("active") or "")
     if not chosen:
         if len(profiles) == 1:

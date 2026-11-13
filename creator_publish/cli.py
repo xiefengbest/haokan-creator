@@ -288,6 +288,8 @@ def _overview() -> str:
 安装：
   git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh
 
+账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。
+
 账号：
   creator profile list
   printf '%s' '密码' | creator profile add --name 创作者名 --phone +8613800138000 --password-stdin

@@ -34,6 +34,11 @@ class ProfileTest(unittest.TestCase):
         os.environ.pop("HAOKAN_CREATOR_HOME", None)
         self.home.cleanup()
 
+    def test_missing_profile_asks_to_apply(self):
+        with self.assertRaises(SystemExit) as caught:
+            resolve_profile(None)
+        self.assertIn("联系谢峰申请", str(caught.exception))
+
     def test_add_and_resolve_without_printing_password(self):
         add_profile("测试账号", "13800138000", "secret-value", "cn")
         listed = list_profiles()

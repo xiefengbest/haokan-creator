@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+APPLY_HINT = "账号、密码和密钥需要联系谢峰申请。拿到之后只保存在这台电脑，不要写进仓库或对话。"
+
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = TOOL_ROOT / ".env"
 REPO_ROOT = TOOL_ROOT
@@ -98,12 +100,12 @@ def load_settings(require_account: bool) -> Settings:
     sign_key = os.environ.get("CREATOR_SIGN_KEY", "").strip()
     sts_url = os.environ.get("CREATOR_STS_URL", "").strip()
     if require_account and (any(not profile[key] for key in endpoint_name) or not sign_key or not sts_url):
-        raise SystemExit("请在本机 .env 填写后台地址、OSS 和签名。不要提交这个文件。")
+        raise SystemExit(f"本机还没有后台配置。{APPLY_HINT}")
     phone = os.environ.get("CREATOR_PHONE", "").strip()
     password = os.environ.get("CREATOR_PASSWORD", "")
     if require_account:
         if not phone or not password:
-            raise SystemExit("还没有可用的创作者账号。先执行 creator profile add，或在命令里加上 --profile。")
+            raise SystemExit(f"还没有可用的创作者账号。{APPLY_HINT} 拿到之后执行 creator profile add，或在命令里加上 --profile。")
         if not album_id:
             raise SystemExit("请加上 --album-id，指定这次要发布的合辑。")
         try:

@@ -4,6 +4,8 @@
 
 这个 GitHub 仓库是公开的。后台地址、OSS 和签名只写在安装目录的 `.env`，不要提交。仓库里的 `.env.example` 必须保持空白。
 
+账号、密码和密钥需要联系谢峰申请。还没有这些配置时，先申请，不要自己查找或编造。拿到之后只保存在这台电脑。
+
 ## 一行安装
 
 ```bash
@@ -15,7 +17,7 @@ git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/re
 发给编辑的一句话，让他们贴给自己的代理：
 
 ```text
-帮我安装并开始使用 Haokan Creator。执行 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh 。装好后阅读 ~/.haokan-creator/repo/skills 里的技能说明，按里面的步骤帮我添加创作者账号并确认能登录。我没明确说发布之前，不要上传。
+帮我安装并开始使用 Haokan Creator。执行 git clone https://github.com/xiefengbest/haokan-creator.git ~/.haokan-creator/repo && bash ~/.haokan-creator/repo/install.sh 。装好后阅读 ~/.haokan-creator/repo/skills 里的技能说明。如果还没有创作者账号、密码或密钥，请我联系谢峰申请，不要自己查找或编造。拿到之后再帮我添加到本机并确认能登录。我没明确说发布之前，不要上传。
 ```
 
 ## 账号
